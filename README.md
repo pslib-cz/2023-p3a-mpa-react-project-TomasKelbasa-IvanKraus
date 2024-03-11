@@ -2,7 +2,7 @@
 
 ## Developeři
 - [Tomáš Kelbasa](https://github.com/TomasKelbasa)
-- [Ivan Kraus](https://github.com/KrausIvan) - fullstack developer, network engineer, UX & UI designer
+- [Ivan Kraus](https://github.com/KrausIvan) - fullstack developer, network engineer, UX & UI designer, copywritter, big data specialist
 
 ## Téma
 
