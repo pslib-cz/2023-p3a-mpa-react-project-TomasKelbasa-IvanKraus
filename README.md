@@ -1,5 +1,9 @@
 # Město Ivanssonne
 
+## Developeři
+- [Tomáš Kelbasa](https://github.com/TomasKelbasa)
+- [Ivan Kraus](https://github.com/KrausIvan)
+
 ## Téma
 
 Předělávka známé deskové hry [Carcassonne](https://www.zatrolene-hry.cz/spolecenska-hra/carcassonne-8/).
