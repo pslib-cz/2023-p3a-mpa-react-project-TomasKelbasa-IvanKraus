@@ -2,7 +2,8 @@
 
 ## Téma
 
-Tady bude krátký a úderný popis o účelu, významu, funkcionalitě...
+Předělávka známé deskové hry [Carcassonne](https://www.zatrolene-hry.cz/spolecenska-hra/carcassonne-8/).
+Hra bude pro dva hráče, možná bude možnost hrát i proti počítači.
 
 ## Odkazy pro vývoj
 
@@ -25,7 +26,7 @@ Zde budou živé linky na:
 - čtení dat z externího RestAPI (fetch)
 - operace DnD
 - využití react-routeru
-- funkčnost na mobilu (výjimka je předělávka komplexních deskových her)
+- funkčnost na mobilu (výjimka je předělávka komplexních deskových her) (sem určitě spadáme :) )
 
 ### Co není obsahem 
 
