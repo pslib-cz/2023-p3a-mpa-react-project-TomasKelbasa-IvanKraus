@@ -9,11 +9,9 @@
 Předělávka známé deskové hry [Carcassonne](https://www.zatrolene-hry.cz/spolecenska-hra/carcassonne-8/).
 Hra bude pro dva hráče, možná bude možnost hrát i proti počítači.
 
-## Odkazy pro vývoj
+## Figma design
 
-Zde budou živé linky na:
-- figma návrh stránek aplikace
-- odkaz do repozitáře projektu, pokud pracuji v teamu a zde vývoj neprobíhá
+https://www.figma.com/file/5vMA4hZmWaYrlaBD8ajpZP/Untitled?type=design&node-id=0-1&mode=design&t=TYaw6hWEpXABnzl1-0
 
 ### Z čeho čerpat
 
