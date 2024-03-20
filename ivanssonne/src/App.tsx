@@ -3,6 +3,8 @@ import './App.scss'
 import Piece, { PieceType, rotatePiece } from './components/Piece'
 import { tileTypes } from '../data/tile_type'
 import { useState } from 'react'
+import Board from './components/Board'
+import Game from './components/Game'
 
 function App() {
 
@@ -21,13 +23,7 @@ function App() {
     <>
       <h1>Carcassonne in react</h1>
       <img src={logo} alt="logo" />
-      <div>
-        <Piece piece={testPiece} />
-        <button onClick={() => setTestPiece(rotatePiece(testPiece, 1))}>Rotate</button>
-        <p>
-          {JSON.stringify(testPiece)}
-        </p>
-      </div>
+      <Game />
     </>
   )
 }
