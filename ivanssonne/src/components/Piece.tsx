@@ -25,6 +25,7 @@ const Piece: React.FC<PieceProps> = ({piece}) => {
     const gridColumn = `${piece.positionX}`;
     const gridRow = `${piece.positionY}`;
 
+
     return (
         <div className={styles["piece"]} style={{gridColumn: gridColumn, gridRow: gridRow}}>
             <img

@@ -34,6 +34,7 @@ export type GameState = {
     meeples: MeepleType[],
     players: PlayerType[],
     currentPlayerId: string,
+    possiblePiecePlacements: number[][]
 }
 
 export type GameAction = {
@@ -137,12 +138,9 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
             const currentPiece = stack.pop();
             
             return {
-                placedPieces: [],
+                ...initialGameReducerState,
                 unplacedPieces: stack,
                 currentPiece: currentPiece,
-                meeples: [],
-                players: [],
-                currentPlayerId: ''
             };
         default:
             return state;
@@ -153,6 +151,7 @@ const initialGameReducerState: GameState = {
     meeples: [],
     placedPieces: [],
     currentPiece: null,
+    possiblePiecePlacements: [],
     players: [],
     unplacedPieces: new Stack<PieceType>(),
     currentPlayerId: ''
