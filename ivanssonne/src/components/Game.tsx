@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import Board from './Board';
 import { GameActionTypes, GameContext } from '../providers/GameProvider';
 import Piece from './Piece';
@@ -22,6 +22,10 @@ const Game: React.FC<GameProps> = (props) => {
     const handlePassTurn = () => {
         gameContext.dispatch({type: GameActionTypes.END_TURN});
     }
+
+    useEffect(() => {
+        gameContext.dispatch({type: GameActionTypes.RESET_GAME});
+    }, []);
 
     return (
         <div>
