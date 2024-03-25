@@ -2,6 +2,10 @@ import React, { createContext, PropsWithChildren, Reducer, useId, useReducer } f
 import { PieceType } from '../components/Piece';
 import { Stack } from 'stack-typescript';
 import { tilePayload, TileType, tileTypes } from '../../data/tile_type';
+import { v4 as uuidv4 } from 'uuid';
+
+
+const firstPiecePosition = [10, 10];
 
 export enum GameActionTypes {
     RESET_GAME,
@@ -93,68 +97,42 @@ const rotatePiece = (piece: PieceType, rotation: number): PieceType => {
 
 const calculatePossiblePlacements = (state: GameState, cPiece: PieceType): number[][] => {
 
+        if(state.placedPieces.length <= 0) return [[...firstPiecePosition]];
+
         const possiblePlacements: number[][] = [];
         const impossiblePlacements: number[][] = [];
 
         state.placedPieces.forEach(piece => {
+            let pos: number[] = [];
             for(let i = 1; i <= 4; i++){
-                let statement: boolean = false;
+                
                 switch(i){
                     case 1:
-                        if(impossiblePlacements.find(ip => ip[0] === piece.positionX && ip[1] === piece.positionY + 1) !== undefined) continue;
-                        statement = state.placedPieces.find(p => p.positionX === piece.positionX && p.positionY === piece.positionY + 1) !== undefined;
-                        if(statement){
-                            impossiblePlacements.push([piece.positionX, piece.positionY + 1]);
-                            continue;
-                        }
-                        if(arePiecesCompatible(piece, cPiece, i)){
-                            possiblePlacements.push([piece.positionX, piece.positionY + 1]);
-                        }else{
-                            impossiblePlacements.push([piece.positionX, piece.positionY + 1]);
-                        }
+                        pos = [piece.positionX, piece.positionY + 1];
                         break;
                     case 2:
-                        if(impossiblePlacements.find(ip => ip[0] === piece.positionX - 1 && ip[1] === piece.positionY) !== undefined) continue;
-                        statement = state.placedPieces.find(p => p.positionX === piece.positionX - 1 && p.positionY === piece.positionY) !== undefined;
-                        if(statement){
-                            impossiblePlacements.push([piece.positionX - 1, piece.positionY]);
-                            continue;
-                        }
-                        if(arePiecesCompatible(piece, cPiece, i)){
-                            possiblePlacements.push([piece.positionX - 1, piece.positionY]);
-                        }
-                        else{
-                            impossiblePlacements.push([piece.positionX - 1, piece.positionY]);
-                        }
+                        pos = [piece.positionX - 1, piece.positionY];
                         break;
                     case 3:
-                        if(impossiblePlacements.find(ip => ip[0] === piece.positionX && ip[1] === piece.positionY - 1) !== undefined) continue;
-                        statement = state.placedPieces.find(p => p.positionX === piece.positionX && p.positionY === piece.positionY - 1) !== undefined;
-                        if(statement){
-                            impossiblePlacements.push([piece.positionX, piece.positionY - 1]);
-                            continue;
-                        }
-                        if(arePiecesCompatible(piece, cPiece, i)){
-                            possiblePlacements.push([piece.positionX, piece.positionY - 1]);
-                        }
-                        else{
-                            impossiblePlacements.push([piece.positionX, piece.positionY - 1]);
-                        }
+                        pos = [piece.positionX, piece.positionY - 1];
                         break;
                     case 4:
-                        if(impossiblePlacements.find(ip => ip[0] === piece.positionX + 1 && ip[1] === piece.positionY) !== undefined) continue;
-                        statement = state.placedPieces.find(p => p.positionX === piece.positionX + 1 && p.positionY === piece.positionY) !== undefined;
-                        if(statement){
-                            impossiblePlacements.push([piece.positionX + 1, piece.positionY]);
-                            continue;
-                        }
-                        if(arePiecesCompatible(piece, cPiece, i)){
-                            possiblePlacements.push([piece.positionX + 1, piece.positionY]);
-                        }
-                        else{
-                            impossiblePlacements.push([piece.positionX + 1, piece.positionY]);
-                        }
+                        pos = [piece.positionX + 1, piece.positionY];
                         break;
+                        
+                }
+                
+                if(impossiblePlacements.find(ip => ip[0] === pos[0] && ip[1] === pos[1]) !== undefined) continue;
+                const statement = state.placedPieces.find(p => p.positionX === pos[0] && p.positionY === pos[1]) !== undefined;
+                if(statement){
+                    impossiblePlacements.push([...pos]);
+                    continue;
+                }
+                if(arePiecesCompatible(piece, cPiece, i)){
+                    possiblePlacements.push([...pos]);
+                }
+                else{
+                    impossiblePlacements.push([...pos]);
                 }
             }
                 
@@ -169,12 +147,14 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
             if(state.currentPiece === null) return state;
             if(state.possiblePiecePlacements.find(p => p[0] === action.locationX && p[1] === action.locationY) === undefined) return state;
             console.log("placing piece")
+
             return {
                 ...state,
                 currentPiece: null,
                 possiblePiecePlacements: [],
                 placedPieces: [...state.placedPieces, {...state.currentPiece, positionX: action.locationX, positionY: action.locationY, placed: true} as PieceType]
             }
+
         case GameActionTypes.ROTATE_CURRENT_PIECE:
             if(state.currentPiece === null) return state;
             const rotatedPiece = rotatePiece(state.currentPiece, action.direction === 'left' ? 3 : 1);
@@ -188,9 +168,31 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
             // todo: calculate finished roads, towns and fields and monestaries
 
             const stackDupe = new Stack<PieceType>(...state.unplacedPieces);
-            const cPiece = stackDupe.pop();
-            const possiblePlacements = calculatePossiblePlacements(state, cPiece);
 
+            if(stackDupe.length <= 0){
+
+                //konec hry
+
+                console.log("Game over");
+                return state;
+            }
+
+            let cPiece = stackDupe.pop();
+            let possiblePlacements = calculatePossiblePlacements(state, cPiece);
+
+            let rotations = 0;
+
+            while(possiblePlacements.length <= 0 && rotations < 4){
+                rotations++;
+                cPiece = rotatePiece(cPiece, 1);
+                possiblePlacements = calculatePossiblePlacements(state, cPiece);
+            }
+
+            if(rotations === 4){
+            
+                // piece cannot be placed anywhere
+
+            }
             return {
                 ...state,
                 currentPiece: cPiece,
@@ -202,7 +204,7 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
             tilePayload.forEach(tile => {
                 for(let i = 0; i < tile.value; i++) {
                     const t: PieceType = {
-                        id: Math.random().toString(36).substring(20),
+                        id: uuidv4(),
                         placed: false,
                         rotation: 0,
                         positionX: 0,
@@ -221,7 +223,7 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
                 ...initialGameReducerState,
                 unplacedPieces: stack,
                 currentPiece: currentPiece,
-                possiblePiecePlacements: [[10, 10]]
+                possiblePiecePlacements: [[...firstPiecePosition]]
             };
         default:
             return state;
@@ -293,10 +295,11 @@ const arePiecesCompatible = (piece1: PieceType, piece2: PieceType, piece1touchin
     const piece1fields = piece1.tile.fields.filter(field => field.sides.find(a => a[0] === piece1touchingSide) !== undefined).map(field => field.sides.find(a => a[0] === piece1touchingSide) as [number, number]);
     const piece2fields = piece2.tile.fields.filter(field => field.sides.find(a => a[0] === piece2touchingSide) !== undefined).map(field => field.sides.find(a => a[0] === piece2touchingSide) as [number, number]);
 
-    if(piece1fields.length !== piece2fields.length) return false;
-
     piece1fields.forEach(field1 => {
         if(piece2fields.find(field2 => field2 === field1) === undefined) return false;
+    });
+    piece2fields.forEach(field2 => {
+        if(piece1fields.find(field1 => field1 === field2) === undefined) return false;
     });
 
     return true;

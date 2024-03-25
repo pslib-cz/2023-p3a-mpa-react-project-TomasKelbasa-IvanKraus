@@ -31,14 +31,13 @@ const Piece: React.FC<PieceProps> = ({piece}) => {
     const gameContext = useContext(GameContext);
 
     if(gameContext && gameContext.state.currentPiece && gameContext.state.currentPiece.id === piece.id){
-        console.log("Current piece");
 
         const [collected, drag, dragPreview] = useDrag(() => ({
             type: DndTypes.PIECE,
             item: {piece: piece},
         }));
         return (
-            <div ref={drag} className={styles["piece"]} style={{gridColumn: gridColumn, gridRow: gridRow}}>
+            <div ref={drag} className={styles["piece"]} style={{}}>
                 <img
                     src={`${defaultPathToImage}${piece.tile.imgname}`}
                     style={{transform: transform}}

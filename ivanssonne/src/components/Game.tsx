@@ -3,6 +3,7 @@ import Board from './Board';
 import { GameActionTypes, GameContext } from '../providers/GameProvider';
 import Piece from './Piece';
 import { tilePayload } from '../../data/tile_type';
+import styles from './Game.module.scss';
 interface GameProps {
     // Define your props here
 }
@@ -28,13 +29,14 @@ const Game: React.FC<GameProps> = (props) => {
     }, []);
 
     return (
-        <div>
+        <div className={styles["game"]}>
             <button onClick={handleReset}>Reset</button>
             <button onClick={handlePassTurn}>Pass turn</button>
             <Board />
 
             <aside>
                 <h2>Your piece</h2>
+                <p>{gameContext.state.unplacedPieces.length} other pieces remains</p>
                 <div style={{width: "100px", height: "100px"}}>
                     {
                         (gameContext.state.currentPiece !== null) ? <Piece piece={gameContext.state.currentPiece} /> : <p>No piece</p>
