@@ -24,11 +24,11 @@ https://www.figma.com/file/5vMA4hZmWaYrlaBD8ajpZP/Untitled?type=design&node-id=0
 
 ### Techniky
 
-- využití localStorage / sessionStorage
-- čtení dat z externího RestAPI (fetch)
-- operace DnD
-- využití react-routeru
-- funkčnost na mobilu (výjimka je předělávka komplexních deskových her) (sem určitě spadáme :) )
+- ❌ využití localStorage / sessionStorage
+- ❌ čtení dat z externího RestAPI (fetch)
+- ✔️ operace DnD
+- ✔️ využití react-routeru
+- ❌ funkčnost na mobilu (výjimka je předělávka komplexních deskových her) (sem určitě spadáme :) )
 
 ### Co není obsahem 
 
