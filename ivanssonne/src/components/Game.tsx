@@ -11,18 +11,6 @@ const Game: React.FC<GameProps> = (props) => {
     
     const gameContext = useContext(GameContext);
 
-
-    const inputX = useRef<HTMLInputElement>(null);
-    const inputY = useRef<HTMLInputElement>(null);
-
-    const handlePlacePiece = () => {
-        if(inputX.current && inputY.current && Number(inputX.current.value) > 0 && Number(inputY.current.value) > 0) {
-            gameContext.dispatch({type: GameActionTypes.PLACE_PIECE, locationX: parseInt(inputX.current.value), locationY: parseInt(inputY.current.value)});
-
-            
-        }
-    }
-
     const handleReset = () => {
         gameContext.dispatch({type: GameActionTypes.RESET_GAME});
     }
@@ -39,11 +27,6 @@ const Game: React.FC<GameProps> = (props) => {
         <div>
             <button onClick={handleReset}>Reset</button>
             <button onClick={handlePassTurn}>Pass turn</button>
-            <div>
-                <input type='number' ref={inputX} />
-                <input type='number' ref={inputY} />
-                <button onClick={handlePlacePiece} >Place piece</button>
-            </div>
             <Board />
 
             <aside>

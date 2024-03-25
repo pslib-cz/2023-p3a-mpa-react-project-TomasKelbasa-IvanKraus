@@ -94,7 +94,7 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
     switch (action.type) {
         case GameActionTypes.PLACE_PIECE:
             if(state.currentPiece === null) return state;
-            if(state.placedPieces.find(p => p.positionX === action.locationX && p.positionY === action.locationY) !== undefined) return state;
+            if(state.possiblePiecePlacements.find(p => p[0] === action.locationX && p[1] === action.locationY) === undefined) return state;
             console.log("placing piece")
             return {
                 ...state,
@@ -112,10 +112,51 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
 
             const stackDupe = new Stack<PieceType>(...state.unplacedPieces);
             const cPiece = stackDupe.pop();
+
+            const possiblePlacements: number[][] = [];
+            state.placedPieces.forEach(piece => {
+                for(let i = 1; i <= 4; i++){
+                    let statement: boolean = false;
+                    switch(i){
+                        case 1:
+                            statement = state.placedPieces.find(p => p.positionX === piece.positionX && p.positionY === piece.positionY + 1) !== undefined;
+                            break;
+                        case 2:
+                            statement = state.placedPieces.find(p => p.positionX === piece.positionX - 1 && p.positionY === piece.positionY) !== undefined;
+                            break;
+                        case 3:
+                            statement = state.placedPieces.find(p => p.positionX === piece.positionX && p.positionY === piece.positionY - 1) !== undefined;
+                            break;
+                        case 4:
+                            statement = state.placedPieces.find(p => p.positionX === piece.positionX + 1 && p.positionY === piece.positionY) !== undefined;
+                            break;
+                    }
+                    if(statement) continue;
+                    if(arePiecesCompatible(piece, cPiece, i)){
+                        switch(i){
+                            case 1:
+                                possiblePlacements.push([piece.positionX, piece.positionY + 1]);
+                                break;
+                            case 2:
+                                possiblePlacements.push([piece.positionX - 1, piece.positionY]);
+                                break;
+                            case 3:
+                                possiblePlacements.push([piece.positionX, piece.positionY - 1]);
+                                break;
+                            case 4:
+                                possiblePlacements.push([piece.positionX + 1, piece.positionY]);
+                                break;
+                        }
+                    }
+                }
+                
+            });
+
             return {
                 ...state,
                 currentPiece: cPiece,
                 unplacedPieces: stackDupe,
+                possiblePiecePlacements: possiblePlacements
             }
         case GameActionTypes.RESET_GAME:
             const arr: PieceType[] = [];
@@ -141,6 +182,7 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
                 ...initialGameReducerState,
                 unplacedPieces: stack,
                 currentPiece: currentPiece,
+                possiblePiecePlacements: [[10, 10]]
             };
         default:
             return state;
@@ -178,3 +220,56 @@ const GameProvider: React.FC<PropsWithChildren> = ({children}) => {
 }
 
 export default GameProvider;
+
+
+// todo
+const isPiecePlacementValid = (piece: PieceType, x: number, y: number): boolean => {
+
+    return true;
+};
+
+/// piece1touchingSide is the side of piece1 that is touching piece2 (1 = bottom, 2 = left, 3 = top, 4 = right)
+const arePiecesCompatible = (piece1: PieceType, piece2: PieceType, piece1touchingSide: number): boolean => {
+
+    let piece2touchingSide: number;
+    switch(piece1touchingSide){
+        case 1:
+            piece2touchingSide = 3;
+            break;
+        case 2:
+            piece2touchingSide = 4;
+            break;
+        case 3:
+            piece2touchingSide = 1;
+            break;
+        case 4:
+            piece2touchingSide = 2;
+            break;
+        default:
+            throw new Error("Invalid side");
+    }
+    console.log(piece1touchingSide, piece2touchingSide);
+
+    const piece1town = piece1.tile.towns.find(town => town.sides.find(a => a === piece1touchingSide) !== undefined) !== undefined;
+    const piece2town = piece2.tile.towns.find(town => town.sides.find(a => a === piece2touchingSide) !== undefined) !== undefined;
+    if(piece1town !== piece2town) return false;
+
+    const piece1road = piece1.tile.roads.find(road => road.sides.find(a => a === piece1touchingSide) !== undefined) !== undefined;
+    const piece2road = piece2.tile.roads.find(road => road.sides.find(a => a === piece2touchingSide) !== undefined) !== undefined;
+    if(piece1road !== piece2road) return false;
+
+    const piece1fields = piece1.tile.fields.filter(field => field.sides.find(a => a[0] === piece1touchingSide) !== undefined).map(field => field.sides.find(a => a[0] === piece1touchingSide) as [number, number]);
+    const piece2fields = piece2.tile.fields.filter(field => field.sides.find(a => a[0] === piece2touchingSide) !== undefined).map(field => field.sides.find(a => a[0] === piece2touchingSide) as [number, number]);
+
+    if(piece1fields.length !== piece2fields.length) return false;
+
+    piece1fields.forEach(field1 => {
+        if(piece2fields.find(field2 => field2 === field1) === undefined) return false;
+    });
+
+    return true;
+
+
+    
+}
+
