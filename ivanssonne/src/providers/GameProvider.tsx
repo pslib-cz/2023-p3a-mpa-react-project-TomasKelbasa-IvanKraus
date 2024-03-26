@@ -14,11 +14,13 @@ export enum GameActionTypes {
     END_TURN,
     REMOVE_MEEPLE,
     ROTATE_CURRENT_PIECE,
+    CHANGE_SETTINGS
 }
 
 export type PlayerType = {
     id: string,
     name: string,
+    meepleColor: MeepleColors
     score: number,
     numberOfMeeples: number,
 }
@@ -38,7 +40,16 @@ export type GameState = {
     meeples: MeepleType[],
     players: PlayerType[],
     currentPlayerId: string,
-    possiblePiecePlacements: number[][]
+    possiblePiecePlacements: number[][],
+    settings: SettingsType
+}
+
+export type SettingsType = {
+    firstName: string,
+    secondName: string,
+    firstColor: MeepleColors,
+    secondColor: MeepleColors,
+    typeOfGame: TypeOfGame
 }
 
 export type GameAction = {
@@ -52,6 +63,21 @@ export type GameAction = {
     direction: 'left' | 'right'
 } | {
     type: GameActionTypes.END_TURN
+} | {
+    type: GameActionTypes.CHANGE_SETTINGS,
+    newSettings: SettingsType
+}
+
+export enum TypeOfGame {
+    PVP, PVC
+}
+
+export enum MeepleColors {
+    BLUE = "BLUE",
+    YELLOW = "YELLOW",
+    GREEN = "GREEN",
+    RED = "RED",
+    BLACK = "BLACK"
 }
 
 /*
@@ -219,12 +245,31 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
             const stack = new Stack<PieceType>(...arr);
             const currentPiece = stack.pop();
             
+            let players: PlayerType[] = []
+
+            if(state.settings.typeOfGame === TypeOfGame.PVP){
+                players.push({id: uuidv4(), name: state.settings.firstName, score: 0, meepleColor: state.settings.firstColor, numberOfMeeples: 8})
+                players.push({id: uuidv4(), name: state.settings.secondName, score: 0, meepleColor: state.settings.secondColor, numberOfMeeples: 8})
+                console.log("pushing")
+            }
+            else if(state.settings.typeOfGame === TypeOfGame.PVC){
+                // TODO
+            }
+
             return {
                 ...initialGameReducerState,
                 unplacedPieces: stack,
                 currentPiece: currentPiece,
-                possiblePiecePlacements: [[...firstPiecePosition]]
+                possiblePiecePlacements: [[...firstPiecePosition]],
+                players: players,
+                settings: state.settings
             };
+        case GameActionTypes.CHANGE_SETTINGS:
+            if(!action.newSettings) throw new Error("Invalid settings");
+            return {
+                ...state,
+                settings: action.newSettings
+            }
         default:
             return state;
     }
@@ -237,7 +282,14 @@ const initialGameReducerState: GameState = {
     possiblePiecePlacements: [],
     players: [],
     unplacedPieces: new Stack<PieceType>(),
-    currentPlayerId: ''
+    currentPlayerId: '',
+    settings: {
+        firstName: "Player1",
+        secondName: "Player2",
+        firstColor: MeepleColors.BLUE,
+        secondColor: MeepleColors.RED,
+        typeOfGame: TypeOfGame.PVP
+    }
 }
 
 export type GameContextType = {

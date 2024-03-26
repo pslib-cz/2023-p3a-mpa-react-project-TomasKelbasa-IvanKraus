@@ -35,6 +35,20 @@ const Game: React.FC<GameProps> = (props) => {
             <Board />
 
             <aside>
+                <div>
+                    <h2>Players</h2>
+                    {
+                        gameContext.state.players.map(player =>                     
+                            <div>
+                                <h3>{player.name}</h3>
+                                <p>Score: {player.score}</p>
+                                <p>Color: {player.meepleColor}</p>
+                            </div>
+                        )
+                    }
+
+
+                </div>
                 <h2>Your piece</h2>
                 <p>{gameContext.state.unplacedPieces.length} other pieces remains</p>
                 <div style={{width: "100px", height: "100px"}}>
