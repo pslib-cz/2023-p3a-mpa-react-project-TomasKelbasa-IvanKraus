@@ -65,7 +65,7 @@ const MeeplePlace: React.FC<MeeplePlaceProps> = ({ position, onClickHandler }) =
     }
 
     return (
-        <button className={className} onClick={onClickHandler}></button>
+        <button className={className} onClick={() => onClickHandler()}></button>
     );
 };
 

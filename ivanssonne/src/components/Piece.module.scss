@@ -1,9 +1,16 @@
 div.piece{
     
     position: relative;
-    
-    img{
-        width: 100%;
-        height: 100%;
-    }
+}
+
+.piece__img{
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.piece__img--unplaced{
+    display: block;
+    width: 100px;
+    height: 100px;
 }

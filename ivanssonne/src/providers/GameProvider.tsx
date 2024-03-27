@@ -30,6 +30,7 @@ export type MeepleType = {
     playerId: string,
     positionX: number,
     positionY: number,
+    positionInPiece: number[],
     state: any
 }
 
@@ -37,7 +38,7 @@ export type GameState = {
     placedPieces: PieceType[],
     unplacedPieces: Stack<PieceType>,
     currentPiece: PieceType | null,
-    currentlyPlacedPiece: PieceType | null,
+    currentlyPlacedPieceId: string | null,
     meeples: MeepleType[],
     players: PlayerType[],
     currentPlayerId: string,
@@ -67,7 +68,14 @@ export type GameAction = {
 } | {
     type: GameActionTypes.CHANGE_SETTINGS,
     newSettings: SettingsType
+} | {
+    type: GameActionTypes.PLACE_MEEPLE,
+    position: number[]
+} | {
+    type: GameActionTypes.REMOVE_MEEPLE,
+    meepleId: string
 }
+
 
 export enum TypeOfGame {
     PVP, PVC
@@ -178,10 +186,40 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
 
             return {
                 ...state,
-                currentlyPlacedPiece: state.currentPiece,
+                currentlyPlacedPieceId: state.currentPiece.id,
                 currentPiece: null,
                 possiblePiecePlacements: [],
                 placedPieces: [...state.placedPieces, {...state.currentPiece, positionX: action.locationX, positionY: action.locationY, placed: true} as PieceType]
+            }
+        case GameActionTypes.PLACE_MEEPLE:
+            console.log("test")
+            let cPlayer  = state.players.find(p => p.id === state.currentPlayerId);
+            console.log(state.currentPlayerId)
+            console.log(cPlayer)
+            if(!cPlayer) return state;
+            if(cPlayer.numberOfMeeples <= 0) return state;
+
+            const cpp = state.placedPieces.find(p => p.id === state.currentlyPlacedPieceId);
+
+            const meeple: MeepleType = {
+                id: uuidv4(),
+                playerId: cPlayer.id,
+                positionX: cpp?.positionX as number,
+                positionY: cpp?.positionY as number,
+                positionInPiece: action.position,
+                state: null
+            }
+            console.log("placing meeple");
+            return {
+                ...state,
+                meeples: [...state.meeples, meeple],
+                players: [...state.players.map(p => {
+                    if(p.id === cPlayer?.id){
+                        return {...cPlayer, numberOfMeeples: cPlayer.numberOfMeeples - 1};    
+                    }else{
+                        return p;
+                    }
+                })]
             }
 
         case GameActionTypes.ROTATE_CURRENT_PIECE:
@@ -211,20 +249,25 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
 
             let rotations = 0;
 
-            while(possiblePlacements.length <= 0 && rotations < 4){
+            while(possiblePlacements.length <= 0){
                 rotations++;
                 cPiece = rotatePiece(cPiece, 1);
                 possiblePlacements = calculatePossiblePlacements(state, cPiece);
+                if(rotations >= 4){
+                    alert("No possible placements for this piece, skipping to next piece");
+                    cPiece = stackDupe.pop();
+                    rotations = 0;
+                }
             }
 
-            if(rotations === 4){
-            
-                // piece cannot be placed anywhere
+            const cPId = state.players.find(p => p.id !== state.currentPlayerId)?.id;
 
-            }
+
+
             return {
                 ...state,
-                currentlyPlacedPiece: null,
+                currentlyPlacedPieceId: null,
+                currentPlayerId: cPId,
                 currentPiece: cPiece,
                 unplacedPieces: stackDupe,
                 possiblePiecePlacements: possiblePlacements
@@ -264,6 +307,7 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
                 ...initialGameReducerState,
                 unplacedPieces: stack,
                 currentPiece: currentPiece,
+                currentPlayerId: players[0].id,
                 possiblePiecePlacements: [[...firstPiecePosition]],
                 players: players,
                 settings: state.settings
