@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect } from 'react';
 import Board from './Board';
 import { GameActionTypes, GameContext } from '../providers/GameProvider';
 import Piece from './Piece';

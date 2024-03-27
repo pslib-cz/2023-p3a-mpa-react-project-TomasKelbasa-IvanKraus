@@ -37,6 +37,7 @@ export type GameState = {
     placedPieces: PieceType[],
     unplacedPieces: Stack<PieceType>,
     currentPiece: PieceType | null,
+    currentlyPlacedPiece: PieceType | null,
     meeples: MeepleType[],
     players: PlayerType[],
     currentPlayerId: string,
@@ -174,8 +175,10 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
             if(state.possiblePiecePlacements.find(p => p[0] === action.locationX && p[1] === action.locationY) === undefined) return state;
             console.log("placing piece")
 
+
             return {
                 ...state,
+                currentlyPlacedPiece: state.currentPiece,
                 currentPiece: null,
                 possiblePiecePlacements: [],
                 placedPieces: [...state.placedPieces, {...state.currentPiece, positionX: action.locationX, positionY: action.locationY, placed: true} as PieceType]
@@ -221,6 +224,7 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
             }
             return {
                 ...state,
+                currentlyPlacedPiece: null,
                 currentPiece: cPiece,
                 unplacedPieces: stackDupe,
                 possiblePiecePlacements: possiblePlacements
@@ -279,6 +283,7 @@ const initialGameReducerState: GameState = {
     meeples: [],
     placedPieces: [],
     currentPiece: null,
+    currentlyPlacedPiece: null,
     possiblePiecePlacements: [],
     players: [],
     unplacedPieces: new Stack<PieceType>(),

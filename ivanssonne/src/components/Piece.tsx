@@ -4,6 +4,7 @@ import styles from './Piece.module.scss';
 import { GameContext } from '../providers/GameProvider';
 import { ConnectDragSource, useDrag } from 'react-dnd';
 import { DndTypes } from './EmptyPiece';
+import MeeplePlace from './MeeplePlace';
 
 export interface PieceProps {
     piece: PieceType;
@@ -45,8 +46,35 @@ const Piece: React.FC<PieceProps> = ({piece}) => {
             </div>
         );
     }else{
+
+        let meeplePlaces: JSX.Element[] = []
+
+        // monastery
+        if(piece.tile.monastery){
+            meeplePlaces.push(<MeeplePlace position={[5]} onClickHandler={() => {}} />);
+        }
+        // towns
+        meeplePlaces.push(...piece.tile.towns.flatMap((town) => {
+            return town.sides.map((side) => <MeeplePlace position={[side]} onClickHandler={() => {}} />);          
+        }));
+        // roads
+        meeplePlaces.push(...piece.tile.roads.flatMap((road) => {
+            return road.sides.map((side) => <MeeplePlace position={[side]} onClickHandler={() => {}} />);          
+        }));
+
+        // fields :-(
+        meeplePlaces.push(...piece.tile.fields.flatMap((field) => {
+            return <MeeplePlace position={field.sides[0]} onClickHandler={() => {}} />;
+        }));
+
         return (
             <div className={styles["piece"]} style={{gridColumn: gridColumn, gridRow: gridRow}}>
+                {
+                    (gameContext.state.currentlyPlacedPiece?.id === piece.id)
+                    ?
+                    meeplePlaces
+                    :
+                    null}
                 <img
                     src={`${defaultPathToImage}${piece.tile.imgname}`}
                     style={{transform: transform}}
