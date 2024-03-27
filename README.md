@@ -1,14 +1,17 @@
-# Název mého projektu, programu, hry...
+# Město Ivanssonne
+
+## Developeři
+- [Tomáš Kelbasa](https://github.com/TomasKelbasa) - brainstorm professional, fullstack programmer, cybernetic specialist, scratch senior programmer
+- [Ivan Kraus](https://github.com/KrausIvan) - figma specialist, fullstack developer, network engineer, UX & UI designer, copywritter, big data specialist
 
 ## Téma
 
-Tady bude krátký a úderný popis o účelu, významu, funkcionalitě...
+Předělávka známé deskové hry [Carcassonne](https://www.zatrolene-hry.cz/spolecenska-hra/carcassonne-8/).
+Hra bude pro dva hráče, možná bude možnost hrát i proti počítači.
 
-## Odkazy pro vývoj
+## Figma design
 
-Zde budou živé linky na:
-- figma návrh stránek aplikace
-- odkaz do repozitáře projektu, pokud pracuji v teamu a zde vývoj neprobíhá
+https://www.figma.com/file/5vMA4hZmWaYrlaBD8ajpZP/Untitled?type=design&node-id=0-1&mode=design&t=TYaw6hWEpXABnzl1-0
 
 ### Z čeho čerpat
 
@@ -21,11 +24,11 @@ Zde budou živé linky na:
 
 ### Techniky
 
-- využití localStorage / sessionStorage
-- čtení dat z externího RestAPI (fetch)
-- operace DnD
-- využití react-routeru
-- funkčnost na mobilu (výjimka je předělávka komplexních deskových her)
+- ❌ využití localStorage / sessionStorage
+- ❌ čtení dat z externího RestAPI (fetch)
+- ✔️ operace DnD
+- ✔️ využití react-routeru
+- ❌ funkčnost na mobilu (výjimka je předělávka komplexních deskových her) (sem určitě spadáme :) )
 
 ### Co není obsahem 
 

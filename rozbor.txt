@@ -1,0 +1,28 @@
+type Piece{
+
+id: string,
+type: PiceVariant
+figures: ...
+}
+
+type PiceVariant{
+
+
+town    - N,S,E,W - connected w [S,E,W]
+	- Erb? = true/false
+
+monastery - true/false
+
+paths - {
+		N:{
+			isTherePath: bool,
+			endsThere: bool,
+			continues: N/S/E/W
+		},
+		E:{},
+		S:{},
+		W:{}
+		
+	}
+}
+}

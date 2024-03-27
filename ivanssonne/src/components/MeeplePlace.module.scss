@@ -1,0 +1,81 @@
+.meeple__place{
+    position: absolute;
+    min-width: 20px;
+    min-height: 20px;
+    z-index: 10;
+}
+
+.meeple__place--center{
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.meeple__place--top-center{
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.meeple__place--top-left{
+    top: 0;
+    left: 15px;
+}
+
+.meeple__place--top-right{
+    top: 0;
+    right: 15px;
+}
+
+.meeple__place--bottom-center{
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.meeple__place--bottom-left{
+    bottom: 0;
+    left: 15px;
+}
+
+.meeple__place--bottom-right{
+    bottom: 0;
+    right: 15px;
+}
+
+.meeple__place--left-center{
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+}
+
+.meeple__place--left-bottom{
+    bottom: 30%;
+    left: 0;
+    transform: translateY(50%);
+}
+
+.meeple__place--left-top{
+    top: 30%;
+    left: 0;
+    transform: translateY(-50%);
+}
+
+
+.meeple__place--right-top{
+    top: 30%;
+    right: 0;
+    transform: translateY(-50%);
+}
+
+.meeple__place--right-center{
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+}
+
+.meeple__place--right-bottom{
+    bottom: 30%;
+    right: 0;
+    transform: translateY(+50%);
+}
