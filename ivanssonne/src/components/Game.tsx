@@ -40,7 +40,7 @@ const Game: React.FC<GameProps> = (props) => {
                     {
                         gameContext.state.players.map(player =>                     
                             <div>
-                                <h3>{player.name}</h3>
+                                <h3>{player.name}{(gameContext.state.currentPlayerId === player.id ? " - playing" : null)}</h3>
                                 <p>Meeples: {player.numberOfMeeples}</p>
                                 <p>Score: {player.score}</p>
                                 <p>Color: {player.meepleColor}</p>

@@ -412,13 +412,19 @@ type PieceSidePair = {
     side: number[]
 }
 
-// isRoadOrTownEmpty checks if the road or town is empty, i.e. there are no meeples on it using recursion
+type StructureInfoType = {
+    type: "T" | "R",
+    meeples: MeepleType[],
+    closed: boolean,
+    sides: PieceSidePair[]
+}
+
+// getInfoOfRoadOrTown returns information about the road or town that the side is a part of
 // type = "R" for road, "T" for town
 // side = side of the piece that is being checked in format [n] where n is the side number, side.length must be 1
 // visitedSides = array of objects that contain information about the visited sides of the pieces, used for recursion
-export const isRoadOrTownEmpty = (piece: PieceType, side: number[], state: GameState, type: "R" | "T", visitedSides: PieceSidePair[] = []): boolean => {
+export const getInfoOfRoadOrTown = (piece: PieceType, side: number[], state: GameState, type: "R" | "T", visitedSides: PieceSidePair[] = []): StructureInfoType => {
 
-    if(!piece) return true;
     if(type !== "R" && type !== "T") throw new Error("Invalid type");
     let structure: RoadType | TownType | undefined;
     if(type === "R"){
@@ -428,13 +434,15 @@ export const isRoadOrTownEmpty = (piece: PieceType, side: number[], state: GameS
     }
     
     if(!structure) throw new Error("Invalid side");
-    let answer = true;
+
+    let answer: MeepleType[] = [];
+    let closed = true;
     structure.sides.forEach(s => {
         if(visitedSides.find(v => v.pieceXpos === piece.positionX && v.pieceYpos === piece.positionY && v.side.find(a => a === s) !== undefined) !== undefined) {}
         else{
-            if(state.meeples.find(m => m.positionX === piece.positionX && m.positionY === piece.positionY && m.positionInPiece.length === 1 && m.positionInPiece[0] === s) !== undefined){
-                answer = false;
-                return false;
+            const meeple = state.meeples.find(m => m.positionX === piece.positionX && m.positionY === piece.positionY && m.positionInPiece.length === 1 && m.positionInPiece[0] === s)
+            if(meeple !== undefined){
+                answer.push(meeple);
             }
             let nextPieceCoords: number[] = [];
             let nextSide: number[] = [];
@@ -460,9 +468,68 @@ export const isRoadOrTownEmpty = (piece: PieceType, side: number[], state: GameS
             }
             const nextPiece = state.placedPieces.find(p => p.positionX === nextPieceCoords[0] && p.positionY === nextPieceCoords[1]);
             visitedSides.push({pieceXpos: piece.positionX, pieceYpos: piece.positionY, side: [s]});
-            if(nextPiece) answer = answer && isRoadOrTownEmpty(nextPiece, nextSide, state,type, visitedSides);
+            if(nextPiece){
+                const recursionResult = getInfoOfRoadOrTown(nextPiece, nextSide, state,type, visitedSides);
+                answer.push(...recursionResult.meeples);
+                closed = closed && recursionResult.closed;
+            }else{
+                closed = false;
+            }
         }
     });
-    return answer;
+    return {
+        type: type,
+        meeples: answer,
+        closed: closed,
+        sides: visitedSides
+    };
+}
+
+export const isFieldEmpty = (piece: PieceType, side: number[], state: GameState, visitedSides: PieceSidePair[] = []): boolean => {
+
+    if(side.length !== 2) throw new Error("Invalid side");
+    let field = piece.tile.fields.find(f => f.sides.find(s => s[0] === side[0] && s[1] == side[1]) !== undefined);
+    if(!field) throw new Error("Invalid side");
+
+    for(let i = 0; i < field.sides.length; i++){
+        let s = field.sides[i];
+        if(visitedSides.find(v => v.pieceXpos === piece.positionX && v.pieceYpos === piece.positionY && v.side[0] === s[0] && v.side[1] === s[1]) !== undefined) {}
+        else{
+            if(state.meeples.find(m => m.positionX === piece.positionX && m.positionY === piece.positionY && m.positionInPiece.length === 2 && m.positionInPiece[0] === s[0] && m.positionInPiece[1] === s[1]) !== undefined){
+                return false;
+            }
+            let nextPieceCoords: number[] = [];
+            let nextSide: number[] = [];
+            switch(s[0]){
+                case 1:
+                    nextPieceCoords = [piece.positionX, piece.positionY + 1];
+                    nextSide = [3];
+                    break;
+                case 2:
+                    nextPieceCoords = [piece.positionX - 1, piece.positionY];
+                    nextSide = [4];
+                    break;
+                case 3:
+                    nextPieceCoords = [piece.positionX, piece.positionY - 1];
+                    nextSide = [1];
+                    break;
+                case 4:
+                    nextPieceCoords = [piece.positionX + 1, piece.positionY];
+                    nextSide = [2];
+                    break;
+                default:
+                    throw new Error("Invalid side");
+            }
+            nextSide.push(s[1]%2 + 1);
+            const nextPiece = state.placedPieces.find(p => p.positionX === nextPieceCoords[0] && p.positionY === nextPieceCoords[1]);
+            visitedSides.push({pieceXpos: piece.positionX, pieceYpos: piece.positionY, side: s});
+            if(nextPiece){
+                if(!isFieldEmpty(nextPiece, nextSide, state, visitedSides)){
+                    return false;
+                }
+            }
+        }
+    };
+    return true;
 
 }

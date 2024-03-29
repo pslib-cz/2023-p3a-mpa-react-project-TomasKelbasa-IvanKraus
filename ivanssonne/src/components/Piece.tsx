@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { TileType } from '../../data/tile_type';
 import styles from './Piece.module.scss';
-import { GameContext, GameActionTypes, isRoadOrTownEmpty } from '../providers/GameProvider';
+import { GameContext, GameActionTypes, getInfoOfRoadOrTown, isFieldEmpty } from '../providers/GameProvider';
 import { ConnectDragSource, useDrag } from 'react-dnd';
 import { DndTypes } from './EmptyPiece';
 import MeeplePlace from './MeeplePlace';
@@ -64,7 +64,7 @@ const Piece: React.FC<PieceProps> = ({piece}) => {
         }
         // towns
         meeplePlaces.push(...piece.tile.towns.flatMap((town) => {
-            if(isRoadOrTownEmpty(piece, town.sides, gameContext.state, "T")){
+            if(getInfoOfRoadOrTown(piece, town.sides, gameContext.state, "T").meeples.length === 0){
                 return town.sides.map((side) => <MeeplePlace position={[side]} onClickHandler={() => handlePlaceMeeple([side])} />);  
             }
             else{
@@ -75,7 +75,7 @@ const Piece: React.FC<PieceProps> = ({piece}) => {
 
         // roads
         meeplePlaces.push(...piece.tile.roads.flatMap((road) => {
-            if(isRoadOrTownEmpty(piece, [road.sides[0]], gameContext.state, "R")){
+            if(getInfoOfRoadOrTown(piece, [road.sides[0]], gameContext.state, "R").meeples.length === 0){
                 return road.sides.map((side) => <MeeplePlace position={[side]} onClickHandler={() => handlePlaceMeeple([side])} />);  
             }
             else{
@@ -86,7 +86,11 @@ const Piece: React.FC<PieceProps> = ({piece}) => {
 
         // fields :-(
         meeplePlaces.push(...piece.tile.fields.flatMap((field) => {
-            return <MeeplePlace position={field.sides[0]} onClickHandler={() => handlePlaceMeeple(field.sides[0])} />;
+            if(isFieldEmpty(piece, field.sides[0], gameContext.state)){
+                return <MeeplePlace position={field.sides[0]} onClickHandler={() => handlePlaceMeeple(field.sides[0])} />;
+            }else{
+                return [];
+            }
         }));
 
 
