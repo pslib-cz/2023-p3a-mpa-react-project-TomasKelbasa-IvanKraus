@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { TileType } from '../../data/tile_type';
 import styles from './Piece.module.scss';
-import { GameContext, GameActionTypes } from '../providers/GameProvider';
+import { GameContext, GameActionTypes, isRoadOrTownEmpty } from '../providers/GameProvider';
 import { ConnectDragSource, useDrag } from 'react-dnd';
 import { DndTypes } from './EmptyPiece';
 import MeeplePlace from './MeeplePlace';
@@ -36,6 +36,8 @@ const Piece: React.FC<PieceProps> = ({piece}) => {
         gameContext.dispatch({type: GameActionTypes.PLACE_MEEPLE, position: pos});
         gameContext.dispatch({type: GameActionTypes.END_TURN});
     }
+
+    // if the piece is the current piece, we want to be able to drag it
     if(gameContext && gameContext.state.currentPiece && gameContext.state.currentPiece.id === piece.id){
 
         const [collected, drag, dragPreview] = useDrag(() => ({
@@ -51,7 +53,8 @@ const Piece: React.FC<PieceProps> = ({piece}) => {
                     />
             </div>
         );
-    }else{
+    }
+    else{
 
         let meeplePlaces: JSX.Element[] = []
 
@@ -61,11 +64,24 @@ const Piece: React.FC<PieceProps> = ({piece}) => {
         }
         // towns
         meeplePlaces.push(...piece.tile.towns.flatMap((town) => {
-            return town.sides.map((side) => <MeeplePlace position={[side]} onClickHandler={() => handlePlaceMeeple([side])} />);          
+            if(isRoadOrTownEmpty(piece, town.sides, gameContext.state, "T")){
+                return town.sides.map((side) => <MeeplePlace position={[side]} onClickHandler={() => handlePlaceMeeple([side])} />);  
+            }
+            else{
+                return [];
+            }
+                    
         }));
+
         // roads
         meeplePlaces.push(...piece.tile.roads.flatMap((road) => {
-            return road.sides.map((side) => <MeeplePlace position={[side]} onClickHandler={() => handlePlaceMeeple([side])} />);          
+            if(isRoadOrTownEmpty(piece, [road.sides[0]], gameContext.state, "R")){
+                return road.sides.map((side) => <MeeplePlace position={[side]} onClickHandler={() => handlePlaceMeeple([side])} />);  
+            }
+            else{
+                return [];
+            }
+                    
         }));
 
         // fields :-(
@@ -74,14 +90,11 @@ const Piece: React.FC<PieceProps> = ({piece}) => {
         }));
 
 
-        let meeples: JSX.Element[] = [];
-        // meeples
+        // list of meeple components for this piece
+        let meeples: JSX.Element[] = gameContext.state.meeples
+        .filter((meeple) => meeple.positionX === piece.positionX && meeple.positionY === piece.positionY)
+        .map((meeple) => <Meeple meeple={meeple} />);
 
-        gameContext.state.meeples.forEach((meeple) => {
-            if(meeple.positionX === piece.positionX && meeple.positionY === piece.positionY){
-                meeples.push(<Meeple meeple={meeple} />);
-            }
-        })
 
         return (
             <div className={styles["piece"]} style={{gridColumn: gridColumn, gridRow: gridRow}}>
@@ -90,10 +103,11 @@ const Piece: React.FC<PieceProps> = ({piece}) => {
                     ?
                     meeplePlaces
                     :
-                    null}
-                    {
-                        meeples
-                    }
+                    null
+                }
+                {
+                    meeples
+                }
                 <img
                     className={styles["piece__img"]}
                     src={`${defaultPathToImage}${piece.tile.imgname}`}

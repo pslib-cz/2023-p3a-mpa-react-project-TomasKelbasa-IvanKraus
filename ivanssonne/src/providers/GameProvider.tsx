@@ -1,7 +1,7 @@
 import React, { createContext, PropsWithChildren, Reducer, useId, useReducer } from 'react';
 import { PieceType } from '../components/Piece';
 import { Stack } from 'stack-typescript';
-import { tilePayload, TileType, tileTypes } from '../../data/tile_type';
+import { RoadType, tilePayload, TileType, tileTypes, TownType } from '../../data/tile_type';
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -261,7 +261,7 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
             }
 
             const cPId = state.players.find(p => p.id !== state.currentPlayerId)?.id;
-
+            if(!cPId) throw new Error("Invalid player id");
 
 
             return {
@@ -327,7 +327,7 @@ const initialGameReducerState: GameState = {
     meeples: [],
     placedPieces: [],
     currentPiece: null,
-    currentlyPlacedPiece: null,
+    currentlyPlacedPieceId: null,
     possiblePiecePlacements: [],
     players: [],
     unplacedPieces: new Stack<PieceType>(),
@@ -404,8 +404,65 @@ const arePiecesCompatible = (piece1: PieceType, piece2: PieceType, piece1touchin
     });
 
     return true;
-
-
-    
 }
 
+type PieceSidePair = {
+    pieceXpos: number,
+    pieceYpos: number,
+    side: number[]
+}
+
+// isRoadOrTownEmpty checks if the road or town is empty, i.e. there are no meeples on it using recursion
+// type = "R" for road, "T" for town
+// side = side of the piece that is being checked in format [n] where n is the side number, side.length must be 1
+// visitedSides = array of objects that contain information about the visited sides of the pieces, used for recursion
+export const isRoadOrTownEmpty = (piece: PieceType, side: number[], state: GameState, type: "R" | "T", visitedSides: PieceSidePair[] = []): boolean => {
+
+    if(!piece) return true;
+    if(type !== "R" && type !== "T") throw new Error("Invalid type");
+    let structure: RoadType | TownType | undefined;
+    if(type === "R"){
+        structure = piece.tile.roads.find(r => r.sides.find(s => s === side[0]) !== undefined);
+    }else{
+        structure = piece.tile.towns.find(t => t.sides.find(s => s === side[0]) !== undefined);
+    }
+    
+    if(!structure) throw new Error("Invalid side");
+    let answer = true;
+    structure.sides.forEach(s => {
+        if(visitedSides.find(v => v.pieceXpos === piece.positionX && v.pieceYpos === piece.positionY && v.side.find(a => a === s) !== undefined) !== undefined) {}
+        else{
+            if(state.meeples.find(m => m.positionX === piece.positionX && m.positionY === piece.positionY && m.positionInPiece.length === 1 && m.positionInPiece[0] === s) !== undefined){
+                answer = false;
+                return false;
+            }
+            let nextPieceCoords: number[] = [];
+            let nextSide: number[] = [];
+            switch(s){
+                case 1:
+                    nextPieceCoords = [piece.positionX, piece.positionY + 1];
+                    nextSide = [3];
+                    break;
+                case 2:
+                    nextPieceCoords = [piece.positionX - 1, piece.positionY];
+                    nextSide = [4];
+                    break;
+                case 3:
+                    nextPieceCoords = [piece.positionX, piece.positionY - 1];
+                    nextSide = [1];
+                    break;
+                case 4:
+                    nextPieceCoords = [piece.positionX + 1, piece.positionY];
+                    nextSide = [2];
+                    break;
+                default:
+                    throw new Error("Invalid side");
+            }
+            const nextPiece = state.placedPieces.find(p => p.positionX === nextPieceCoords[0] && p.positionY === nextPieceCoords[1]);
+            visitedSides.push({pieceXpos: piece.positionX, pieceYpos: piece.positionY, side: [s]});
+            if(nextPiece) answer = answer && isRoadOrTownEmpty(nextPiece, nextSide, state,type, visitedSides);
+        }
+    });
+    return answer;
+
+}

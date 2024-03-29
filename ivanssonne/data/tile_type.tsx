@@ -72,7 +72,7 @@ export const tileTypes: TileType[] = [
         ],
         fields: [
         ],
-        monastery: true,
+        monastery: false,
     },
     {
         type: "D",
