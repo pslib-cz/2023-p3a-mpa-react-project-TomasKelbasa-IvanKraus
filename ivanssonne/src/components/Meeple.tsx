@@ -1,6 +1,6 @@
 import React from 'react';
 import { MeepleType } from '../providers/GameProvider';
-import styles from './Meeple.module.scss';
+import styles from './styles/Meeple.module.scss';
 import black_meeple from '../assets/black_meeple.png';
 
 interface MeepleProps {

@@ -43,15 +43,6 @@ export type GameState = {
     players: PlayerType[],
     currentPlayerId: string,
     possiblePiecePlacements: number[][],
-    settings: SettingsType
-}
-
-export type SettingsType = {
-    firstName: string,
-    secondName: string,
-    firstColor: MeepleColors,
-    secondColor: MeepleColors,
-    typeOfGame: TypeOfGame
 }
 
 export type GameAction = {
@@ -65,9 +56,6 @@ export type GameAction = {
     direction: 'left' | 'right'
 } | {
     type: GameActionTypes.END_TURN
-} | {
-    type: GameActionTypes.CHANGE_SETTINGS,
-    newSettings: SettingsType
 } | {
     type: GameActionTypes.PLACE_MEEPLE,
     position: number[]
@@ -176,6 +164,12 @@ const calculatePossiblePlacements = (state: GameState, cPiece: PieceType): numbe
         return possiblePlacements.filter(p => impossiblePlacements.find(ip => ip[0] === p[0] && ip[1] === p[1]) === undefined);
 }
 
+function onlyUnique(value:any, index:number, array:any[]) {
+    if(value === null || value === undefined) return false;
+    return array.indexOf(value) === index;
+  }
+  
+
 const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
     switch (action.type) {
         case GameActionTypes.PLACE_PIECE:
@@ -232,7 +226,33 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
                 possiblePiecePlacements: calculatePossiblePlacements(state, rotatedPiece)
             }
         case GameActionTypes.END_TURN:
-            // todo: calculate finished roads, towns and fields and monestaries
+            // todo: calculate finished roads, towns and monestaries
+            const currentlyPlacedPiece = state.placedPieces.find(p => p.id === state.currentlyPlacedPieceId);
+            const meepleIdsToRemove: string[] = [];
+            let modifiedPlayers = [...state.players];
+            if(!currentlyPlacedPiece) console.error("Ivan je ivan")
+            else{
+                const closedRoads: StructureInfoType[] = currentlyPlacedPiece?.tile.roads.map(r => getInfoOfRoadOrTown(currentlyPlacedPiece, [r.sides[0]], state, "R")).filter(infor => infor.closed) as StructureInfoType[];
+                for(let i = 0; i < closedRoads.length; i++){
+                    let road = closedRoads[i];
+                    if(road.meeples.length === 0) continue
+                    let scoringPlayers = determineScoringPlayers(road.meeples);
+
+                    meepleIdsToRemove.push(...road.meeples.map(m => m.id));
+                    const roadScore = 2 * road.sides.map(s => state.placedPieces.find(p => p.positionX === s.pieceXpos && p.positionY === s.pieceYpos)?.id).filter(onlyUnique).length;
+                    [...scoringPlayers].forEach(id => {
+                        const index = state.players.findIndex(p => p.id === id);
+                        modifiedPlayers[index] = {...modifiedPlayers[index], score: modifiedPlayers[index].score + roadScore, numberOfMeeples: modifiedPlayers[index].numberOfMeeples + 1};
+
+                    })
+                }
+                /*
+                const closedTowns: StructureInfoType[] = currentlyPlacedPiece?.tile.towns.map(t => getInfoOfRoadOrTown(currentlyPlacedPiece, [t.sides[0]], state, "T")).filter(info => info.closed);
+
+                for(let e = 0; e < closedTowns.length; e++){
+
+                }*/
+            }
 
             const stackDupe = new Stack<PieceType>(...state.unplacedPieces);
 
@@ -266,6 +286,8 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
 
             return {
                 ...state,
+                players: modifiedPlayers,
+                meeples: state.meeples.filter(m => !meepleIdsToRemove.includes(m.id)),
                 currentlyPlacedPieceId: null,
                 currentPlayerId: cPId,
                 currentPiece: cPiece,
@@ -532,4 +554,31 @@ export const isFieldEmpty = (piece: PieceType, side: number[], state: GameState,
     };
     return true;
 
+}
+
+type DictionaryPair = {
+    key: string,
+    value: number
+}
+
+const determineScoringPlayers = (meeples: MeepleType[]) => {
+
+    if(meeples.length === 1) return meeples[0].id;
+
+    const playerIds = meeples.map(m => m.playerId);
+    let d: DictionaryPair[] = [];
+
+    let max = 1;
+
+    playerIds.forEach((id) => {
+        const index = d.findIndex(p => p.key === id);
+        if(index !== -1){
+            d[index].value = d[index].value + 1;
+            max = Math.max(max, d[index].value);
+        }else{
+            d.push({key: id, value: 1});
+        }
+    });
+
+    return d.filter(p => p.value === max).map(a => a.key);
 }

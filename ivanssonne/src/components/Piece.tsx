@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { TileType } from '../../data/tile_type';
-import styles from './Piece.module.scss';
+import styles from './styles/Piece.module.scss';
 import { GameContext, GameActionTypes, getInfoOfRoadOrTown, isFieldEmpty } from '../providers/GameProvider';
 import { ConnectDragSource, useDrag } from 'react-dnd';
 import { DndTypes } from './EmptyPiece';

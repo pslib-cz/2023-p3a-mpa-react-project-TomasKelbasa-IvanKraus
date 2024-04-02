@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './MeeplePlace.module.scss';
+import styles from './styles/MeeplePlace.module.scss';
 
 interface MeeplePlaceProps {
     position: number[];

@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import styles from './EmptyPiece.module.scss';
+import styles from './styles/EmptyPiece.module.scss';
 import { useDrop } from 'react-dnd';
 import { GameActionTypes, GameContext } from '../providers/GameProvider';
 import { PieceType } from './Piece';

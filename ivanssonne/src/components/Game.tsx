@@ -3,7 +3,7 @@ import Board from './Board';
 import { GameActionTypes, GameContext } from '../providers/GameProvider';
 import Piece from './Piece';
 import { tilePayload } from '../../data/tile_type';
-import styles from './Game.module.scss';
+import styles from './styles/Game.module.scss';
 interface GameProps {
     // Define your props here
 }

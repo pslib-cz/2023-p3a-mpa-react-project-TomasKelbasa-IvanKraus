@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import styles from './Board.module.scss';
+import styles from './styles/Board.module.scss';
 import { tileTypes } from '../../data/tile_type';
 import Piece, { PieceType } from './Piece';
 import { GameContext } from '../providers/GameProvider';
