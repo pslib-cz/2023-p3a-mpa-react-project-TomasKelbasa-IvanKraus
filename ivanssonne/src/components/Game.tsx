@@ -2,13 +2,12 @@ import React, { useContext, useEffect } from 'react';
 import Board from './Board';
 import { GameActionTypes, GameContext } from '../providers/GameProvider';
 import Piece from './Piece';
-import { tilePayload } from '../../data/tile_type';
 import styles from './styles/Game.module.scss';
 interface GameProps {
     // Define your props here
 }
 
-const Game: React.FC<GameProps> = (props) => {
+const Game: React.FC<GameProps> = ({}) => {
     
     const gameContext = useContext(GameContext);
 
@@ -41,6 +40,7 @@ const Game: React.FC<GameProps> = (props) => {
                         gameContext.state.players.map(player =>                     
                             <div>
                                 <h3>{player.name}{(gameContext.state.currentPlayerId === player.id ? " - playing" : null)}</h3>
+                                <p>{player.id}</p>
                                 <p>Meeples: {player.numberOfMeeples}</p>
                                 <p>Score: {player.score}</p>
                                 <p>Color: {player.meepleColor}</p>

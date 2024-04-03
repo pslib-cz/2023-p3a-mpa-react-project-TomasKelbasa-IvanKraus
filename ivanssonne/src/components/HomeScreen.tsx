@@ -1,12 +1,11 @@
 import React, { FormEvent, useContext, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Dropdown from 'react-dropdown';
-import { GameActionTypes, MeepleColors, SettingsType, TypeOfGame } from '../providers/GameProvider';
-import { GameContext } from '../providers/GameProvider';
+import { SettingsContext, MeepleColors, SettingsActionTypes, TypeOfGame } from '../providers/SettingsProvider';
 
 const HomeScreen: React.FC = () => {
 
-    const gameContext = useContext(GameContext);
+    const settingsContext = useContext(SettingsContext);
 
     const handleSettingsSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -17,15 +16,11 @@ const HomeScreen: React.FC = () => {
         let fC = firstColor as MeepleColors;
         let sC = secondColor as MeepleColors;
 
-        gameContext.dispatch({type: GameActionTypes.CHANGE_SETTINGS, newSettings: {
-            firstColor: fC,
-            secondColor: sC,
-            firstName: firstName.current.value,
-            secondName: secondName.current.value,
-            typeOfGame: TypeOfGame.PVP
-        }})
-
-
+        settingsContext.dispatch({type: SettingsActionTypes.SET_FIRST_NAME, payload: firstName.current?.value ?? "Player1"});
+        settingsContext.dispatch({type: SettingsActionTypes.SET_SECOND_NAME, payload: secondName.current?.value ?? "Player2"});
+        settingsContext.dispatch({type: SettingsActionTypes.SET_FIRST_COLOR, payload: fC});
+        settingsContext.dispatch({type: SettingsActionTypes.SET_SECOND_COLOR, payload: sC});
+        settingsContext.dispatch({type: SettingsActionTypes.SET_TYPE_OF_GAME, payload: TypeOfGame.PVP});
 
     }
 

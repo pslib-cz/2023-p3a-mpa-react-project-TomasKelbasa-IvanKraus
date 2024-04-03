@@ -1,7 +1,6 @@
-import React from 'react';
-import { MeepleType } from '../providers/GameProvider';
+import React, { useContext } from 'react';
+import { MeepleType, GameContext } from '../providers/GameProvider';
 import styles from './styles/Meeple.module.scss';
-import black_meeple from '../assets/black_meeple.png';
 
 interface MeepleProps {
     meeple: MeepleType
@@ -10,7 +9,11 @@ interface MeepleProps {
 const Meeple: React.FC<MeepleProps> = ({meeple}) => {
     // Add your component logic here
 
+    const gameContext = useContext(GameContext);
     let className = styles["meeple"];
+
+    const color = gameContext.state.players.find(player => player.id === meeple.playerId)?.meepleColor;
+    const standingProperty: string = meeple.positionInPiece.length === 1 ? "S" : "L";
 
     if(meeple.positionInPiece.length === 1){
         switch(meeple.positionInPiece[0]){
@@ -64,7 +67,7 @@ const Meeple: React.FC<MeepleProps> = ({meeple}) => {
         }
     }
     return (
-        <img src={black_meeple} alt="meeple" className={className}/>
+        <img src={`./src/assets/${standingProperty}-${color}-MEEPLE.png`} alt="meeple" className={className}/>
     );
 };
 

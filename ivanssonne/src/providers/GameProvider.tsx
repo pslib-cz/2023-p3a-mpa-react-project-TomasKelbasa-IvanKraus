@@ -1,8 +1,9 @@
-import React, { createContext, PropsWithChildren, Reducer, useId, useReducer } from 'react';
+import React, { createContext, PropsWithChildren, Reducer, useContext, useId, useReducer } from 'react';
 import { PieceType } from '../components/Piece';
 import { Stack } from 'stack-typescript';
 import { RoadType, tilePayload, TileType, tileTypes, TownType } from '../../data/tile_type';
 import { v4 as uuidv4 } from 'uuid';
+import { SettingsContext, TypeOfGame, MeepleColors } from './SettingsProvider';
 
 
 const firstPiecePosition = [10, 10];
@@ -62,19 +63,6 @@ export type GameAction = {
 } | {
     type: GameActionTypes.REMOVE_MEEPLE,
     meepleId: string
-}
-
-
-export enum TypeOfGame {
-    PVP, PVC
-}
-
-export enum MeepleColors {
-    BLUE = "BLUE",
-    YELLOW = "YELLOW",
-    GREEN = "GREEN",
-    RED = "RED",
-    BLACK = "BLACK"
 }
 
 /*
@@ -167,8 +155,7 @@ const calculatePossiblePlacements = (state: GameState, cPiece: PieceType): numbe
 function onlyUnique(value:any, index:number, array:any[]) {
     if(value === null || value === undefined) return false;
     return array.indexOf(value) === index;
-  }
-  
+}
 
 const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
     switch (action.type) {
@@ -230,28 +217,80 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
             const currentlyPlacedPiece = state.placedPieces.find(p => p.id === state.currentlyPlacedPieceId);
             const meepleIdsToRemove: string[] = [];
             let modifiedPlayers = [...state.players];
+
             if(!currentlyPlacedPiece) console.error("Ivan je ivan")
             else{
-                const closedRoads: StructureInfoType[] = currentlyPlacedPiece?.tile.roads.map(r => getInfoOfRoadOrTown(currentlyPlacedPiece, [r.sides[0]], state, "R")).filter(infor => infor.closed) as StructureInfoType[];
+
+                // monestaries
+                const monasteries = state.meeples.filter(m => m.positionInPiece[0] === 5);
+                for(let q = 0; q < monasteries.length; q++){
+                    let monastery = monasteries[q];
+                    let closed = true;
+                    for(let m = -1; m <= 1; m++){
+                        for(let n = -1; n <= 1; n++){
+                            if(state.placedPieces.find(p => p.positionX === monastery.positionX + m && p.positionY === monastery.positionY + n) === undefined)closed = false;
+                        }
+                    }
+                    if(closed){
+                        meepleIdsToRemove.push(monastery.id);
+                        const ix = modifiedPlayers.findIndex(p => p.id === monastery.playerId);
+                        if(ix > -1){
+                            modifiedPlayers[ix] = {...modifiedPlayers[ix], numberOfMeeples: modifiedPlayers[ix].numberOfMeeples + 1, score: modifiedPlayers[ix].score + 9};
+                        }
+                    }
+                }    
+
+                // roads
+                const closedRoads: StructureInfoType[] = currentlyPlacedPiece?.tile.roads.map(r => getInfoOfRoadOrTown(currentlyPlacedPiece, [r.sides[0]], state, "R")).filter(infor => infor.closed);
                 for(let i = 0; i < closedRoads.length; i++){
                     let road = closedRoads[i];
                     if(road.meeples.length === 0) continue
                     let scoringPlayers = determineScoringPlayers(road.meeples);
 
+                    // special validation for one road including multiple roads from this piece
+                    if(meepleIdsToRemove.find(m => road.meeples.find(r => r.id === m) !== undefined) !== undefined) continue;
                     meepleIdsToRemove.push(...road.meeples.map(m => m.id));
-                    const roadScore = 2 * road.sides.map(s => state.placedPieces.find(p => p.positionX === s.pieceXpos && p.positionY === s.pieceYpos)?.id).filter(onlyUnique).length;
-                    [...scoringPlayers].forEach(id => {
-                        const index = state.players.findIndex(p => p.id === id);
-                        modifiedPlayers[index] = {...modifiedPlayers[index], score: modifiedPlayers[index].score + roadScore, numberOfMeeples: modifiedPlayers[index].numberOfMeeples + 1};
+                    const roadScore = road.sides.map(s => state.placedPieces.find(p => p.positionX === s.pieceXpos && p.positionY === s.pieceYpos)?.id).filter(onlyUnique).length;
+                    road.meeples.forEach(m => {
+                        const ix = modifiedPlayers.findIndex(p => p.id === m.playerId);
+                        if(ix > -1){
+                            modifiedPlayers[ix] = {...modifiedPlayers[ix], numberOfMeeples: modifiedPlayers[ix].numberOfMeeples + 1};
+                        }
+                    });
 
-                    })
+                    for(let e = 0; e < scoringPlayers.length; e++){
+                        const ix = modifiedPlayers.findIndex(p => p.id === scoringPlayers[e]);
+                        modifiedPlayers[ix] = {...modifiedPlayers[ix], score: modifiedPlayers[ix].score + roadScore};
+                    }
                 }
-                /*
+
+                // towns
                 const closedTowns: StructureInfoType[] = currentlyPlacedPiece?.tile.towns.map(t => getInfoOfRoadOrTown(currentlyPlacedPiece, [t.sides[0]], state, "T")).filter(info => info.closed);
+                for(let j = 0; j < closedTowns.length; j++){
+                    let town = closedTowns[j];
+                    if(town.meeples.length === 0) continue;
+                    let scoringPlayers = determineScoringPlayers(town.meeples);
+                    // special validation for one town including multiple towns from this piece
+                    if(meepleIdsToRemove.find(m => town.meeples.find(r => r.id === m) !== undefined) !== undefined) continue;
+                    meepleIdsToRemove.push(...town.meeples.map(m => m.id));
+                    const townPieces = town.sides.map(s => state.placedPieces.find(p => p.positionX === s.pieceXpos && p.positionY === s.pieceYpos)?.id).filter(onlyUnique);
+                    let townScore = townPieces.length;
+                    townScore += townPieces.filter(p => state.placedPieces.find(h => h.id === p)?.tile.towns[0].bonus).length;
+                    if(townScore === 2) townScore = 1;
+                    townScore *= 2;
+                    town.meeples.forEach(m => {
+                        const ix = modifiedPlayers.findIndex(p => p.id === m.playerId);
+                        if(ix > -1){
+                            modifiedPlayers[ix] = {...modifiedPlayers[ix], numberOfMeeples: modifiedPlayers[ix].numberOfMeeples + 1};
+                        }
+                    });
 
-                for(let e = 0; e < closedTowns.length; e++){
-
-                }*/
+                    for(let k = 0; k < scoringPlayers.length; k++){
+                        const ix = modifiedPlayers.findIndex(p => p.id === scoringPlayers[k]);
+                        modifiedPlayers[ix] = {...modifiedPlayers[ix], score: modifiedPlayers[ix].score + townScore};
+                    }
+                }
+                
             }
 
             const stackDupe = new Stack<PieceType>(...state.unplacedPieces);
@@ -315,13 +354,14 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
             const currentPiece = stack.pop();
             
             let players: PlayerType[] = []
+            const settingsContext = useContext(SettingsContext);
 
-            if(state.settings.typeOfGame === TypeOfGame.PVP){
-                players.push({id: uuidv4(), name: state.settings.firstName, score: 0, meepleColor: state.settings.firstColor, numberOfMeeples: 8})
-                players.push({id: uuidv4(), name: state.settings.secondName, score: 0, meepleColor: state.settings.secondColor, numberOfMeeples: 8})
+            if(settingsContext.state.typeOfGame === TypeOfGame.PVP){
+                players.push({id: uuidv4(), name: settingsContext.state.firstName, score: 0, meepleColor: settingsContext.state.firstColor, numberOfMeeples: 8})
+                players.push({id: uuidv4(), name: settingsContext.state.secondName, score: 0, meepleColor: settingsContext.state.secondColor, numberOfMeeples: 8})
                 console.log("pushing")
             }
-            else if(state.settings.typeOfGame === TypeOfGame.PVC){
+            else if(settingsContext.state.typeOfGame === TypeOfGame.PVC){
                 // TODO
             }
 
@@ -331,15 +371,8 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
                 currentPiece: currentPiece,
                 currentPlayerId: players[0].id,
                 possiblePiecePlacements: [[...firstPiecePosition]],
-                players: players,
-                settings: state.settings
+                players: players
             };
-        case GameActionTypes.CHANGE_SETTINGS:
-            if(!action.newSettings) throw new Error("Invalid settings");
-            return {
-                ...state,
-                settings: action.newSettings
-            }
         default:
             return state;
     }
@@ -353,14 +386,7 @@ const initialGameReducerState: GameState = {
     possiblePiecePlacements: [],
     players: [],
     unplacedPieces: new Stack<PieceType>(),
-    currentPlayerId: '',
-    settings: {
-        firstName: "Player1",
-        secondName: "Player2",
-        firstColor: MeepleColors.BLUE,
-        secondColor: MeepleColors.RED,
-        typeOfGame: TypeOfGame.PVP
-    }
+    currentPlayerId: ''
 }
 
 export type GameContextType = {
@@ -561,9 +587,9 @@ type DictionaryPair = {
     value: number
 }
 
-const determineScoringPlayers = (meeples: MeepleType[]) => {
+const determineScoringPlayers = (meeples: MeepleType[]): string[] => {
 
-    if(meeples.length === 1) return meeples[0].id;
+    if(meeples.length === 1) return [meeples[0].playerId];
 
     const playerIds = meeples.map(m => m.playerId);
     let d: DictionaryPair[] = [];

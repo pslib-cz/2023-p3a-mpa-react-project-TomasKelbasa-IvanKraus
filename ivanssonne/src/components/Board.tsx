@@ -12,15 +12,17 @@ interface BoardProps {
 const Board: React.FC<BoardProps> = () => {
     // Implement component logic here
 
+    const boardWidth = 50;
+    const boardHeight = 50;
 
-    const gridTemplateColumns = "repeat(100, 100px)";
-    const gridTemplateRows = "repeat(100, 100px)";
+    const gridTemplateColumns = `repeat(${boardWidth}, 100px)`;
+    const gridTemplateRows = `repeat(${boardHeight}, 100px)`;
 
     const gameContext = useContext(GameContext);
 
     const emptyPieces = [];
-    for(let i = 0; i < 100; i++) {
-        for(let j = 0; j < 100; j++) {
+    for(let i = 0; i < boardWidth; i++) {
+        for(let j = 0; j < boardHeight; j++) {
             emptyPieces.push(<EmptyPiece key={`${i}-${j}`} x={i} y={j} />);
         }
     }
