@@ -35,21 +35,14 @@ const EmptyPiece: React.FC<EmptyPieceProps> = ({ x, y }) => {
         backgroundColor = "green";
         return (
             <div ref={drop} className={styles["piece--empty"]} style={{ gridColumn: gridColumn, gridRow: gridRow, backgroundColor: backgroundColor }} >
-                {"X: " + x + " Y: " + y}
             </div>
         );
     }else{
         return (
             <div className={styles["piece--empty"]} style={{ gridColumn: gridColumn, gridRow: gridRow, backgroundColor: backgroundColor }} >
-                {"X: " + x + " Y: " + y}
             </div>
         );
     }
-
-    
-    
-
-
     
 };
 

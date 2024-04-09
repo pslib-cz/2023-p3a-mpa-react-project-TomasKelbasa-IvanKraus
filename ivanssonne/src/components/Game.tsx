@@ -33,10 +33,9 @@ const Game: React.FC<GameProps> = ({}) => {
 
     return (
         <div className={styles["game"]}>
-            <button onClick={handleReset}>Reset</button>
             <Board />
-
             <aside>
+                <button onClick={handleReset}>Reset</button>
                 <div>
                     <h2>Players</h2>
                     {
