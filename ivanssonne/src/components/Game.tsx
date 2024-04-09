@@ -34,7 +34,6 @@ const Game: React.FC<GameProps> = ({}) => {
     return (
         <div className={styles["game"]}>
             <button onClick={handleReset}>Reset</button>
-            <button onClick={handlePassTurn}>Pass turn</button>
             <Board />
 
             <aside>
@@ -71,7 +70,13 @@ const Game: React.FC<GameProps> = ({}) => {
                     :
                     null
                 }
-                
+                {
+                    (gameContext.state.currentPiece === null && gameContext.state.currentlyPlacedPieceId !== null)
+                    ?
+                    <button onClick={handlePassTurn}>Pass turn</button>
+                    :
+                    null
+                }
             </aside>
         </div>
     );
