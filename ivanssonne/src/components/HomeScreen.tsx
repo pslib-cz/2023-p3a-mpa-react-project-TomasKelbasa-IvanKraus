@@ -22,6 +22,8 @@ const HomeScreen: React.FC = () => {
         settingsContext.dispatch({type: SettingsActionTypes.SET_SECOND_COLOR, payload: sC});
         settingsContext.dispatch({type: SettingsActionTypes.SET_TYPE_OF_GAME, payload: TypeOfGame.PVP});
 
+        alert("Settings succesfully updated")
+
     }
 
     const firstName = useRef<HTMLInputElement>(null);

@@ -13,7 +13,7 @@ export enum GameActionTypes {
     PLACE_PIECE,
     PLACE_MEEPLE,
     END_TURN,
-    REMOVE_MEEPLE,
+    GET_NEW_PIECE,
     ROTATE_CURRENT_PIECE,
     CHANGE_SETTINGS
 }
@@ -39,6 +39,7 @@ export type GameState = {
     placedPieces: PieceType[],
     unplacedPieces: Stack<PieceType>,
     currentPiece: PieceType | null,
+    currentPieceImpossibleToPlace: boolean,
     currentlyPlacedPieceId: string | null,
     meeples: MeepleType[],
     players: PlayerType[],
@@ -61,8 +62,7 @@ export type GameAction = {
     type: GameActionTypes.PLACE_MEEPLE,
     position: number[]
 } | {
-    type: GameActionTypes.REMOVE_MEEPLE,
-    meepleId: string
+    type: GameActionTypes.GET_NEW_PIECE,
 }
 
 /*
@@ -212,6 +212,7 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
                 currentPiece: rotatedPiece,
                 possiblePiecePlacements: calculatePossiblePlacements(state, rotatedPiece)
             }
+        
         case GameActionTypes.END_TURN:
             // todo: calculate finished roads, towns and monestaries
             const currentlyPlacedPiece = state.placedPieces.find(p => p.id === state.currentlyPlacedPieceId);
@@ -308,20 +309,28 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
 
             let rotations = 0;
 
+            const cPId = state.players.find(p => p.id !== state.currentPlayerId)?.id;
+            if(!cPId) throw new Error("Invalid player id");
+
             while(possiblePlacements.length <= 0){
                 rotations++;
                 cPiece = rotatePiece(cPiece, 1);
                 possiblePlacements = calculatePossiblePlacements(state, cPiece);
                 if(rotations >= 4){
-                    alert("No possible placements for this piece, skipping to next piece");
-                    cPiece = stackDupe.pop();
-                    rotations = 0;
+                    return {
+                        ...state,
+                        players: modifiedPlayers,
+                        meeples: state.meeples.filter(m => !meepleIdsToRemove.includes(m.id)),
+                        currentlyPlacedPieceId: null,
+                        currentPlayerId: cPId,
+                        currentPiece: cPiece,
+                        unplacedPieces: stackDupe,
+                        possiblePiecePlacements: [],
+                        currentPieceImpossibleToPlace: true
+                    }
+                    
                 }
             }
-
-            const cPId = state.players.find(p => p.id !== state.currentPlayerId)?.id;
-            if(!cPId) throw new Error("Invalid player id");
-
 
             return {
                 ...state,
@@ -333,6 +342,49 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
                 unplacedPieces: stackDupe,
                 possiblePiecePlacements: possiblePlacements
             }
+        case GameActionTypes.GET_NEW_PIECE:
+            if(!state.currentPieceImpossibleToPlace) return state;
+            const stackCopy = new Stack<PieceType>(...state.unplacedPieces);
+
+            if(stackCopy.length <= 0){
+
+                //konec hry
+
+                console.log("Game over");
+                return state;
+            }
+
+            let cp = stackCopy.pop();
+            let pp = calculatePossiblePlacements(state, cp);
+
+            let rot = 0;
+
+            while(pp.length <= 0){
+                rot++;
+                cp = rotatePiece(cp, 1);
+                pp = calculatePossiblePlacements(state, cp);
+                if(rot >= 4){
+                    return {
+                        ...state,
+                        currentlyPlacedPieceId: null,
+                        currentPiece: cp,
+                        unplacedPieces: stackCopy,
+                        possiblePiecePlacements: [],
+                        currentPieceImpossibleToPlace: true
+                    }
+                }
+            }
+
+            return {
+                ...state,
+                currentlyPlacedPieceId: null,
+                currentPiece: cp,
+                unplacedPieces: stackCopy,
+                possiblePiecePlacements: pp,
+                currentPieceImpossibleToPlace: false
+            }
+
+        
         case GameActionTypes.RESET_GAME:
             const arr: PieceType[] = [];
             tilePayload.forEach(tile => {
@@ -382,6 +434,7 @@ const initialGameReducerState: GameState = {
     meeples: [],
     placedPieces: [],
     currentPiece: null,
+    currentPieceImpossibleToPlace: false,
     currentlyPlacedPieceId: null,
     possiblePiecePlacements: [],
     players: [],

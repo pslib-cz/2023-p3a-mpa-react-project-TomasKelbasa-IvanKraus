@@ -23,6 +23,10 @@ const Game: React.FC<GameProps> = ({}) => {
         gameContext.dispatch({type: GameActionTypes.END_TURN});
     }
 
+    const handleGetNewPiece = () => {
+        gameContext.dispatch({type: GameActionTypes.GET_NEW_PIECE});
+    }
+
     useEffect(() => {
         gameContext.dispatch({type: GameActionTypes.RESET_GAME});
     }, []);
@@ -40,7 +44,6 @@ const Game: React.FC<GameProps> = ({}) => {
                         gameContext.state.players.map(player =>                     
                             <div>
                                 <h3>{player.name}{(gameContext.state.currentPlayerId === player.id ? " - playing" : null)}</h3>
-                                <p>{player.id}</p>
                                 <p>Meeples: {player.numberOfMeeples}</p>
                                 <p>Score: {player.score}</p>
                                 <p>Color: {player.meepleColor}</p>
@@ -57,7 +60,17 @@ const Game: React.FC<GameProps> = ({}) => {
                         (gameContext.state.currentPiece !== null) ? <Piece piece={gameContext.state.currentPiece} /> : <p>No piece</p>
                     }
                 </div>
-                    <button onClick={handleRotateRight}>Rotate</button>
+                <button onClick={handleRotateRight}>Rotate</button>
+                {
+                    (gameContext.state.currentPieceImpossibleToPlace)
+                    ?
+                    <div>
+                        <p>Impossible to place</p>
+                        <button onClick={handleGetNewPiece}>Get other piece</button>
+                    </div>
+                    :
+                    null
+                }
                 
             </aside>
         </div>
