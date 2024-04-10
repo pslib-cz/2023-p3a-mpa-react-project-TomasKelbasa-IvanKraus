@@ -2,7 +2,7 @@
 
 ## Developeři
 - [Tomáš Kelbasa](https://github.com/TomasKelbasa) - brainstorm professional, fullstack programmer, cybernetic specialist, scratch senior programmer
-  <img src="./ivanssonnne/src/assets/tomas.webp" width="350" alt="Tomas">
+  <img src="ivanssonne/src/assets/tomas.webp" width="350" alt="Tomas">
 - [Ivan Kraus](https://github.com/KrausIvan) - figma specialist, fullstack developer, network engineer, UX & UI designer, copywritter, big data specialist
 
 ## Téma
