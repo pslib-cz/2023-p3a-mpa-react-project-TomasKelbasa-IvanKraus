@@ -1,13 +1,24 @@
+$beige-color: #F0D9B5;
+$brown-color: #B58863;
+$gold-color: #EBC600;
+$yellow-color: #FFE500;
+$black-color: #000000;
+$green-color: #00FF38;
+$blue-color: #0038FF;
+$red-color: #FF0000;
+
 .homepage {
     background-image: url('../../assets/home-background.jpg');
     height: 100vh;
+    background-size: cover;
     position: relative;
     font-family: 'Lindsay', sans-serif;
+    color: $beige-color;
 
     img {
         object-fit: cover;
         position: absolute;
-        width: 30rem;
+        width: 20rem;
         top: 2%;
         left: 1%;
     }
@@ -18,8 +29,67 @@
         left: 50%;
         transform: translate(-50%, -50%);
         background: linear-gradient(to right, #1E2021, #323436);
-        color: white;
-        width: 30rem;
+        font-size: 2rem;
         border-radius: 1rem;
+        padding: 0rem;
+        padding-left: 3rem;
+        padding-right: 3rem;
+
+        .user {
+
+            div {
+                margin-left: 5rem;
+            }
+            label {
+                margin-right: 1rem;
+            }
+            input {
+                background: transparent;
+                border: 2px solid $beige-color;
+                border-radius: 0.5rem;
+            }
+
+            .user__color {
+                display: flex;
+                margin-top: 1rem;
+            }
+            .bullets > * {
+                border: 2px solid $black-color !important;
+                transition: all 0.2s ease-in-out;
+                &:hover {
+                    cursor: pointer;
+                    scale: 1.1;
+                }
+                &.selected {
+                    scale: 1.1;
+                    border: 2px solid $beige-color !important;
+                }
+            }
+        }
     }
+    
+    .homepage__footer {
+        position: absolute;
+        bottom: 0;
+        right: 2%;
+        font-size: 1.5rem;
+    }
+
+    .circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: inline-block;
+        margin: 5px;
+        cursor: pointer;
+      }
+      
+      .circleBorderSelected {
+        border: 2px solid black !important;
+      }
+      
+      .circleBorderNotSelected {
+        border: 2px solid white !important;
+      }
+      
 }
