@@ -2,6 +2,9 @@ import React, { FormEvent, useContext, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Dropdown from 'react-dropdown';
 import { SettingsContext, MeepleColors, SettingsActionTypes, TypeOfGame } from '../providers/SettingsProvider';
+import logo from '../assets/logo.png';
+import styles from './styles/HomeScreen.module.scss';
+import './styles/fonts.css';
 
 const HomeScreen: React.FC = () => {
 
@@ -13,8 +16,8 @@ const HomeScreen: React.FC = () => {
         console.log("first dropdown: " + firstColor)
         console.log("second dropdown: " + secondColor)
 
-        let fC = firstColor as MeepleColors;
-        let sC = secondColor as MeepleColors;
+        const fC = firstColor as MeepleColors;
+        const sC = secondColor as MeepleColors;
 
         settingsContext.dispatch({type: SettingsActionTypes.SET_FIRST_NAME, payload: firstName.current?.value ?? "Player1"});
         settingsContext.dispatch({type: SettingsActionTypes.SET_SECOND_NAME, payload: secondName.current?.value ?? "Player2"});
@@ -36,6 +39,7 @@ const HomeScreen: React.FC = () => {
     let secondDropdownOptions = ["BLACK", "BLUE", "GREEN", "RED", "YELLOW"].filter(col => col !== firstColor);
 
     return (
+        /*
         <div>
             <h1>Reactssonne</h1>
             <form onSubmit={(e) => handleSettingsSubmit(e)}>
@@ -56,6 +60,34 @@ const HomeScreen: React.FC = () => {
             </form>
             <Link to="/game">Start Game</Link>
             <Link to="/about">About</Link>
+        </div>
+        */
+
+        <div className={styles["homepage"]}>
+            <img src={logo} alt="logo"/>
+            
+            <div className={styles["homepage__login"]}>
+                <h2>Settings</h2>
+                <form onSubmit={(e) => handleSettingsSubmit(e)}>
+                    <div>
+                        <p>Hráč 1:</p>
+                        <div>
+                            <label htmlFor='FirstName'>Jméno:</label>
+                            <input ref={firstName} id='FirstName' type='text' required />
+                            <Dropdown options={firstDropdownOptions} onChange={(opt) => setFirstColor(opt.value)} />
+                        </div>
+                    </div>
+                    <div>
+                        <p>Hráč 2:</p>
+                        <div>
+                            <label htmlFor='SecondName'>Jméno:</label>
+                            <input ref={secondName} id='SecondName' type='text' required />
+                            <Dropdown options={secondDropdownOptions} onChange={(opt) => setSecondColor(opt.value)} />
+                        </div>
+                    </div>
+                    <button type='submit'>Potvrdit</button>
+                </form>
+            </div>
         </div>
     );
 };

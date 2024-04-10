@@ -1,0 +1,25 @@
+.homepage {
+    background-image: url('../../assets/home-background.jpg');
+    height: 100vh;
+    position: relative;
+    font-family: 'Lindsay', sans-serif;
+
+    img {
+        object-fit: cover;
+        position: absolute;
+        width: 30rem;
+        top: 2%;
+        left: 1%;
+    }
+
+    .homepage__login {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(to right, #1E2021, #323436);
+        color: white;
+        width: 30rem;
+        border-radius: 1rem;
+    }
+}
