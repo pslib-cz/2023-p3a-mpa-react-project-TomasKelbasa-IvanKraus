@@ -22,16 +22,15 @@ const EmptyPiece: React.FC<EmptyPieceProps> = ({ x, y }) => {
     
     const gameContext = useContext(GameContext);
 
-    if(gameContext.state.possiblePiecePlacements.some((placement) => placement[0] === x && placement[1] === y)) {
-        const [collectedProps, drop] = useDrop({
-            accept: DndTypes.PIECE,
-            drop: (item: PieceType) => {
-                console.log(item);
-                gameContext.dispatch({type: GameActionTypes.PLACE_PIECE, locationX: x, locationY: y});
-            }
-        
-        })
+    const [collectedProps, drop] = useDrop({
+        accept: DndTypes.PIECE,
+        drop: (item: PieceType) => {
+            gameContext.dispatch({type: GameActionTypes.PLACE_PIECE, locationX: x, locationY: y});
+        }
+    
+    });
 
+    if(gameContext.state.possiblePiecePlacements.some((placement) => placement[0] === x && placement[1] === y)) {
         backgroundColor = "green";
         return (
             <div ref={drop} className={styles["piece--empty"]} style={{ gridColumn: gridColumn, gridRow: gridRow, backgroundColor: backgroundColor }} >

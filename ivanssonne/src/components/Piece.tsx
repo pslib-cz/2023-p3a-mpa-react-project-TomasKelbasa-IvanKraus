@@ -6,6 +6,7 @@ import { ConnectDragSource, useDrag } from 'react-dnd';
 import { DndTypes } from './EmptyPiece';
 import MeeplePlace from './MeeplePlace';
 import Meeple from './Meeple';
+import { endOfTurn } from './Game';
 
 export interface PieceProps {
     piece: PieceType;
@@ -34,7 +35,7 @@ const Piece: React.FC<PieceProps> = ({piece}) => {
 
     const handlePlaceMeeple = (pos: number[]) => {
         gameContext.dispatch({type: GameActionTypes.PLACE_MEEPLE, position: pos});
-        gameContext.dispatch({type: GameActionTypes.END_TURN});
+        endOfTurn(gameContext);
     }
 
     // if the piece is the current piece, we want to be able to drag it
