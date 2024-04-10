@@ -15,7 +15,8 @@ export enum GameActionTypes {
     END_TURN,
     GET_NEW_PIECE,
     ROTATE_CURRENT_PIECE,
-    CHANGE_SETTINGS
+    REWARD_PLAYER,
+    REMOVE_MEEPLE
 }
 
 export type PlayerType = {
@@ -63,6 +64,13 @@ export type GameAction = {
     position: number[]
 } | {
     type: GameActionTypes.GET_NEW_PIECE,
+} | {
+    type: GameActionTypes.REWARD_PLAYER,
+    playerId: string,
+    score: number
+} | {
+    type: GameActionTypes.REMOVE_MEEPLE,
+    meepleId: string
 }
 
 /*
@@ -152,18 +160,11 @@ const calculatePossiblePlacements = (state: GameState, cPiece: PieceType): numbe
         return possiblePlacements.filter(p => impossiblePlacements.find(ip => ip[0] === p[0] && ip[1] === p[1]) === undefined);
 }
 
-function onlyUnique(value:any, index:number, array:any[]) {
-    if(value === null || value === undefined) return false;
-    return array.indexOf(value) === index;
-}
-
 const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
     switch (action.type) {
         case GameActionTypes.PLACE_PIECE:
-            if(state.currentPiece === null) return state;
+            if(!state.currentPiece) return state;
             if(state.possiblePiecePlacements.find(p => p[0] === action.locationX && p[1] === action.locationY) === undefined) return state;
-            console.log("placing piece")
-
 
             return {
                 ...state,
@@ -173,10 +174,8 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
                 placedPieces: [...state.placedPieces, {...state.currentPiece, positionX: action.locationX, positionY: action.locationY, placed: true} as PieceType]
             }
         case GameActionTypes.PLACE_MEEPLE:
-            console.log("test")
             let cPlayer  = state.players.find(p => p.id === state.currentPlayerId);
-            console.log(state.currentPlayerId)
-            console.log(cPlayer)
+
             if(!cPlayer) return state;
             if(cPlayer.numberOfMeeples <= 0) return state;
 
@@ -190,7 +189,7 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
                 positionInPiece: action.position,
                 state: null
             }
-            console.log("placing meeple");
+
             return {
                 ...state,
                 meeples: [...state.meeples, meeple],
@@ -212,97 +211,50 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
                 currentPiece: rotatedPiece,
                 possiblePiecePlacements: calculatePossiblePlacements(state, rotatedPiece)
             }
-        
-        case GameActionTypes.END_TURN:
-            // todo: calculate finished roads, towns and monestaries
-            const currentlyPlacedPiece = state.placedPieces.find(p => p.id === state.currentlyPlacedPieceId);
-            const meepleIdsToRemove: string[] = [];
-            let modifiedPlayers = [...state.players];
 
-            if(!currentlyPlacedPiece) console.error("Ivan je ivan")
-            else{
+        case GameActionTypes.REMOVE_MEEPLE:
+            const meepleToRemove = state.meeples.find(m => m.id === action.meepleId);
+            if(!meepleToRemove) return state;
+            const playerToRemoveMeeple = state.players.find(p => p.id === meepleToRemove.playerId);
+            if(!playerToRemoveMeeple) return state;
 
-                // monestaries
-                const monasteries = state.meeples.filter(m => m.positionInPiece[0] === 5);
-                for(let q = 0; q < monasteries.length; q++){
-                    let monastery = monasteries[q];
-                    let closed = true;
-                    for(let m = -1; m <= 1; m++){
-                        for(let n = -1; n <= 1; n++){
-                            if(state.placedPieces.find(p => p.positionX === monastery.positionX + m && p.positionY === monastery.positionY + n) === undefined)closed = false;
-                        }
+            return {
+                ...state,
+                meeples: state.meeples.filter(m => m.id !== action.meepleId),
+                players: state.players.map(p => {
+                    if(p.id === playerToRemoveMeeple.id){
+                        return {...p, numberOfMeeples: p.numberOfMeeples + 1};
+                    }else{
+                        return p;
                     }
-                    if(closed){
-                        meepleIdsToRemove.push(monastery.id);
-                        const ix = modifiedPlayers.findIndex(p => p.id === monastery.playerId);
-                        if(ix > -1){
-                            modifiedPlayers[ix] = {...modifiedPlayers[ix], numberOfMeeples: modifiedPlayers[ix].numberOfMeeples + 1, score: modifiedPlayers[ix].score + 9};
-                        }
-                    }
-                }    
-
-                // roads
-                const closedRoads: StructureInfoType[] = currentlyPlacedPiece?.tile.roads.map(r => getInfoOfRoadOrTown(currentlyPlacedPiece, [r.sides[0]], state, "R")).filter(infor => infor.closed);
-                for(let i = 0; i < closedRoads.length; i++){
-                    let road = closedRoads[i];
-                    if(road.meeples.length === 0) continue
-                    let scoringPlayers = determineScoringPlayers(road.meeples);
-
-                    // special validation for one road including multiple roads from this piece
-                    if(meepleIdsToRemove.find(m => road.meeples.find(r => r.id === m) !== undefined) !== undefined) continue;
-                    meepleIdsToRemove.push(...road.meeples.map(m => m.id));
-                    const roadScore = road.sides.map(s => state.placedPieces.find(p => p.positionX === s.pieceXpos && p.positionY === s.pieceYpos)?.id).filter(onlyUnique).length;
-                    road.meeples.forEach(m => {
-                        const ix = modifiedPlayers.findIndex(p => p.id === m.playerId);
-                        if(ix > -1){
-                            modifiedPlayers[ix] = {...modifiedPlayers[ix], numberOfMeeples: modifiedPlayers[ix].numberOfMeeples + 1};
-                        }
-                    });
-
-                    for(let e = 0; e < scoringPlayers.length; e++){
-                        const ix = modifiedPlayers.findIndex(p => p.id === scoringPlayers[e]);
-                        modifiedPlayers[ix] = {...modifiedPlayers[ix], score: modifiedPlayers[ix].score + roadScore};
-                    }
-                }
-
-                // towns
-                const closedTowns: StructureInfoType[] = currentlyPlacedPiece?.tile.towns.map(t => getInfoOfRoadOrTown(currentlyPlacedPiece, [t.sides[0]], state, "T")).filter(info => info.closed);
-                for(let j = 0; j < closedTowns.length; j++){
-                    let town = closedTowns[j];
-                    if(town.meeples.length === 0) continue;
-                    let scoringPlayers = determineScoringPlayers(town.meeples);
-                    // special validation for one town including multiple towns from this piece
-                    if(meepleIdsToRemove.find(m => town.meeples.find(r => r.id === m) !== undefined) !== undefined) continue;
-                    meepleIdsToRemove.push(...town.meeples.map(m => m.id));
-                    const townPieces = town.sides.map(s => state.placedPieces.find(p => p.positionX === s.pieceXpos && p.positionY === s.pieceYpos)?.id).filter(onlyUnique);
-                    let townScore = townPieces.length;
-                    townScore += townPieces.filter(p => state.placedPieces.find(h => h.id === p)?.tile.towns[0].bonus).length;
-                    if(townScore === 2) townScore = 1;
-                    townScore *= 2;
-                    town.meeples.forEach(m => {
-                        const ix = modifiedPlayers.findIndex(p => p.id === m.playerId);
-                        if(ix > -1){
-                            modifiedPlayers[ix] = {...modifiedPlayers[ix], numberOfMeeples: modifiedPlayers[ix].numberOfMeeples + 1};
-                        }
-                    });
-
-                    for(let k = 0; k < scoringPlayers.length; k++){
-                        const ix = modifiedPlayers.findIndex(p => p.id === scoringPlayers[k]);
-                        modifiedPlayers[ix] = {...modifiedPlayers[ix], score: modifiedPlayers[ix].score + townScore};
-                    }
-                }
-                
+                })
             }
 
-            const stackDupe = new Stack<PieceType>(...state.unplacedPieces);
+        case GameActionTypes.REWARD_PLAYER:
+            const player = state.players.find(p => p.id === action.playerId);
+            if(!player) return state;
+            return {
+                ...state,
+                players: state.players.map(p => {
+                    if(p.id === action.playerId){
+                        return {...p, score: p.score + action.score};
+                    }else{
+                        return p;
+                    }
+                })
+            }
+        
+        case GameActionTypes.END_TURN:
 
-            if(stackDupe.length <= 0){
+            if(state.unplacedPieces.length <= 0){
 
                 //konec hry
 
                 console.log("Game over");
                 return state;
             }
+
+            const stackDupe = new Stack<PieceType>(...state.unplacedPieces);
 
             let cPiece = stackDupe.pop();
             let possiblePlacements = calculatePossiblePlacements(state, cPiece);
@@ -319,8 +271,6 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
                 if(rotations >= 4){
                     return {
                         ...state,
-                        players: modifiedPlayers,
-                        meeples: state.meeples.filter(m => !meepleIdsToRemove.includes(m.id)),
                         currentlyPlacedPieceId: null,
                         currentPlayerId: cPId,
                         currentPiece: cPiece,
@@ -334,14 +284,13 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
 
             return {
                 ...state,
-                players: modifiedPlayers,
-                meeples: state.meeples.filter(m => !meepleIdsToRemove.includes(m.id)),
                 currentlyPlacedPieceId: null,
                 currentPlayerId: cPId,
                 currentPiece: cPiece,
                 unplacedPieces: stackDupe,
                 possiblePiecePlacements: possiblePlacements
             }
+
         case GameActionTypes.GET_NEW_PIECE:
             if(!state.currentPieceImpossibleToPlace) return state;
             const stackCopy = new Stack<PieceType>(...state.unplacedPieces);
@@ -507,13 +456,13 @@ const arePiecesCompatible = (piece1: PieceType, piece2: PieceType, piece1touchin
     return true;
 }
 
-type PieceSidePair = {
+export type PieceSidePair = {
     pieceXpos: number,
     pieceYpos: number,
     side: number[]
 }
 
-type StructureInfoType = {
+export type StructureInfoType = {
     type: "T" | "R",
     meeples: MeepleType[],
     closed: boolean,
@@ -640,7 +589,7 @@ type DictionaryPair = {
     value: number
 }
 
-const determineScoringPlayers = (meeples: MeepleType[]): string[] => {
+export const determineScoringPlayers = (meeples: MeepleType[]): string[] => {
 
     if(meeples.length === 1) return [meeples[0].playerId];
 
