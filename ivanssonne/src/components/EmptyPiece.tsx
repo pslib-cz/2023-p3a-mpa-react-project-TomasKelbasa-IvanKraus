@@ -17,7 +17,10 @@ const EmptyPiece: React.FC<EmptyPieceProps> = ({ x, y }) => {
     const gridColumn = `${x}`;
     const gridRow = `${y}`;
 
-    let backgroundColor = (x + y) % 2 === 0 ? "white" : "grey";
+    const beige = "#F0D9B5";
+    const darkbeige = "#B58863";
+
+    let backgroundColor = (x + y) % 2 === 0 ? beige : darkbeige;
 
     
     const gameContext = useContext(GameContext);

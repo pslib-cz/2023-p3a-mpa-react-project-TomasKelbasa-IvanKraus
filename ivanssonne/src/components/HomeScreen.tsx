@@ -4,6 +4,7 @@ import Dropdown from 'react-dropdown';
 import { SettingsContext, MeepleColors, SettingsActionTypes, TypeOfGame } from '../providers/SettingsProvider';
 import logo from '../assets/logo.png';
 import styles from './styles/HomeScreen.module.scss';
+
 const ColorCircle = ({ color, onSelect, selected, selectable }) => {
     const circleStyle = {
         backgroundColor: color.toLowerCase(),

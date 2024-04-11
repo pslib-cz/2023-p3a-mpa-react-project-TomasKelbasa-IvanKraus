@@ -558,5 +558,5 @@ export const tilePayload = [
     { letter: "U", value: 8 },
     { letter: "V", value: 9 },
     { letter: "W", value: 4 },*/
-    { letter: "X", value: 1 }
+    //{ letter: "X", value: 1 }
 ];

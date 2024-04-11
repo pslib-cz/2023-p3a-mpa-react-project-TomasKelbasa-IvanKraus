@@ -160,7 +160,7 @@ const calculatePossiblePlacements = (state: GameState, cPiece: PieceType): numbe
         return possiblePlacements.filter(p => impossiblePlacements.find(ip => ip[0] === p[0] && ip[1] === p[1]) === undefined);
 }
 
-const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
+export const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
     switch (action.type) {
         case GameActionTypes.PLACE_PIECE:
             if(!state.currentPiece) return state;
@@ -189,7 +189,7 @@ const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
                 positionInPiece: action.position,
                 state: null
             }
-
+            console.log(meeple);
             return {
                 ...state,
                 meeples: [...state.meeples, meeple],
