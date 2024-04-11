@@ -34,7 +34,13 @@ $red-color: #FF0000;
         padding: 0rem;
         padding-left: 3rem;
         padding-right: 3rem;
-
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+        padding-bottom: 2rem;
+        padding-top: 2rem;
+        width: 35rem;
+        p {
+            margin: 0;
+        }
         .user {
 
             div {
@@ -47,6 +53,7 @@ $red-color: #FF0000;
                 background: transparent;
                 border: 2px solid $beige-color;
                 border-radius: 0.5rem;
+                color: $beige-color;
             }
 
             .user__color {
@@ -54,17 +61,35 @@ $red-color: #FF0000;
                 margin-top: 1rem;
             }
             .bullets > * {
-                border: 2px solid $black-color !important;
                 transition: all 0.2s ease-in-out;
                 &:hover {
                     cursor: pointer;
                     scale: 1.1;
                 }
-                &.selected {
-                    scale: 1.1;
-                    border: 2px solid $beige-color !important;
-                }
             }
+        }
+        .button--submit {
+            background: transparent;
+            border: 2px solid $beige-color;
+            color: $beige-color;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-left: 50%;
+            transform: translateX(-50%);
+            margin-top: 2rem;
+            transition: all 0.3s ease-in-out;
+            &:hover {
+                background: $beige-color;
+                color: $black-color;
+                cursor: pointer;
+            }
+        }
+        .success_message {
+            position: absolute;
+            bottom: 0.5rem;
+            left: 1rem;
+            font-size: 1.5rem;
+            transition: all 0.3s ease-in-out;
         }
     }
     
@@ -84,12 +109,31 @@ $red-color: #FF0000;
         cursor: pointer;
       }
       
-      .circleBorderSelected {
-        border: 2px solid black !important;
+      .homepage__menu {
+        position: absolute;
+        bottom: 5%;
+        left: 50%;
+        transform: translate(-50%);
+        display: flex;
+        font-size: 2rem;
+        border-radius: 1rem;
+        padding-left: 5rem;
+        padding: 2rem;
+        gap: 4rem;
+        a {
+            color: $gold-color;
+            text-decoration: none;
+            border: 2px solid $gold-color;
+            border-radius: 0.5rem;
+            background: linear-gradient(to right, #1E2021, #323436);
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+            &:hover {
+                background: $gold-color;
+                color: $black-color;
+                cursor: pointer;
+            }
+        }
       }
-      
-      .circleBorderNotSelected {
-        border: 2px solid white !important;
-      }
-      
 }
