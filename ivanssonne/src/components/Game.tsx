@@ -72,8 +72,8 @@ export const endOfTurn = (gameContext: GameContextType) => {
         }
     }
     
-    meepleIdsToRemove.forEach(m => {
-        gameContext.dispatch({type: GameActionTypes.REMOVE_MEEPLE, meepleId: m});
+    meepleIdsToRemove.forEach(meepleId => {
+        gameContext.dispatch({type: GameActionTypes.REMOVE_MEEPLE, meepleId});
     });
     
     gameContext.dispatch({type: GameActionTypes.END_TURN});

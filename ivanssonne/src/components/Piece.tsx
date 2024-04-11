@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { TileType } from '../../data/tile_type';
 import styles from './styles/Piece.module.scss';
 import { GameContext, gameReducer, GameActionTypes, getInfoOfRoadOrTown, isFieldEmpty } from '../providers/GameProvider';
@@ -33,12 +33,20 @@ const Piece: React.FC<PieceProps> = ({piece}) => {
 
     const gameContext = useContext(GameContext);
 
-    const handlePlaceMeeple = (pos: number[]) => {
-         gameContext.dispatch({type: GameActionTypes.PLACE_MEEPLE, position: pos})
-         const nextState = gameReducer(gameContext.state, {type: GameActionTypes.PLACE_MEEPLE, position: pos});
-        endOfTurn({state: nextState, dispatch: gameContext.dispatch});
+    const [shouldEndTurn, setShouldEndTurn] = useState(false);
 
+    const handlePlaceMeeple = (pos: number[]) => {
+        gameContext.dispatch({type: GameActionTypes.PLACE_MEEPLE, position: pos});
+        setShouldEndTurn(true);
     }
+
+    // please dont judge me for this
+    useEffect(() => {
+        if (shouldEndTurn) {
+            endOfTurn(gameContext);
+            setShouldEndTurn(false);
+        }
+    }, [shouldEndTurn, gameContext]);
 
 
     // if the piece is the current piece, we want to be able to drag it

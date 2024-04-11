@@ -72,7 +72,6 @@ export type GameAction = {
     type: GameActionTypes.REMOVE_MEEPLE,
     meepleId: string
 }
-
 /*
 *  all rotations must be done using this function!
 *  rotation = angle in pi/2 radians from 1 to 3
@@ -211,24 +210,23 @@ export const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
                 currentPiece: rotatedPiece,
                 possiblePiecePlacements: calculatePossiblePlacements(state, rotatedPiece)
             }
-
         case GameActionTypes.REMOVE_MEEPLE:
-            const meepleToRemove = state.meeples.find(m => m.id === action.meepleId);
-            if(!meepleToRemove) return state;
-            const playerToRemoveMeeple = state.players.find(p => p.id === meepleToRemove.playerId);
-            if(!playerToRemoveMeeple) return state;
+        const meepleToRemove = state.meeples.find(m => m.id === action.meepleId);
+        if(!meepleToRemove) return state;
+        const playerToRemoveMeeple = state.players.find(p => p.id === meepleToRemove.playerId);
+        if(!playerToRemoveMeeple) return state;
 
-            return {
-                ...state,
-                meeples: state.meeples.filter(m => m.id !== action.meepleId),
-                players: state.players.map(p => {
-                    if(p.id === playerToRemoveMeeple.id){
-                        return {...p, numberOfMeeples: p.numberOfMeeples + 1};
-                    }else{
-                        return p;
-                    }
-                })
-            }
+        return {
+            ...state,
+            meeples: state.meeples.filter(m => m.id !== action.meepleId),
+            players: state.players.map(p => {
+                if(p.id === playerToRemoveMeeple.id){
+                    return {...p, numberOfMeeples: p.numberOfMeeples + 1};
+                }else{
+                    return p;
+                }
+            })
+        }
 
         case GameActionTypes.REWARD_PLAYER:
             const player = state.players.find(p => p.id === action.playerId);
