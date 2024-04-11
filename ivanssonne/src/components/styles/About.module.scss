@@ -1,0 +1,51 @@
+$beige-color: #F0D9B5;
+$brown-color: #B58863;
+$gold-color: #EBC600;
+$yellow-color: #FFE500;
+$black-color: #000000;
+$green-color: #00FF38;
+$blue-color: #0038FF;
+$red-color: #FF0000;
+
+.about {
+    background: linear-gradient(to right, #1E2021, #323436);
+    overflow: hidden;
+    height: 100dvh;
+    position: relative;
+    
+    .about__logo {
+        position: absolute;
+        bottom: 5%;
+        left: 5%;
+        width: 20rem;
+        z-index: 2;
+    }
+
+    .about__pdf {
+        margin: 0 auto;
+        position: absolute;
+        left: 50%;
+        translate: -50%;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+    .button--back {
+        position: absolute;
+        bottom: 5%;
+        z-index: 3;
+        right: 5%;
+        text-decoration: none;
+        color: $gold-color;
+        padding: 1rem 1rem;
+        border: 2px solid $gold-color;
+        border-radius: 0.5rem;
+        font-size: 1.5rem;
+        transition: 0.3s ease-in-out;
+        font-family: 'Lindsay', sans-serif;
+        &:hover {
+            background: $gold-color;
+            color: $black-color;
+        }
+    }
+}
