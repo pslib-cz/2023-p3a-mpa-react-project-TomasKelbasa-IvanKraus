@@ -182,7 +182,7 @@ const Game: React.FC<GameProps> = () => {
                     {gameContext.state.currentPieceImpossibleToPlace ? (
                         <div className={styles["cant_put"]}>
                             <p>Nelze položit tento dílek.</p>
-                            <button onClick={handleGetNewPiece}>Get other piece</button>
+                            <button onClick={handleGetNewPiece}>Vzít si jiný dílek.</button>
                         </div>
                     ) : null}
                 </div>
