@@ -1,3 +1,12 @@
+$beige-color: #F0D9B5;
+$brown-color: #B58863;
+$gold-color: #EBC600;
+$yellow-color: #FFE500;
+$black-color: #000000;
+$green-color: #00FF38;
+$blue-color: #0038FF;
+$red-color: #FF0000;
+
 div.board{
     display: grid;
     max-width: 100vw;
@@ -6,14 +15,65 @@ div.board{
     overflow-x: scroll;
 }
 
-.board_overlay {
-    position: absolute;
-    z-index: 0;
-    left: 0;
+.board_overlay { 
+    position: fixed;
     top: 0;
-    right: 0;
+    left: 0;
+    width: calc(100vw - 24px);
+    height: calc(100vh - 24px);
+    background-size: cover;
+    background-position: center;
+    z-index: 10;  // Nastavte vhodnou hodnotu, aby byl overlay nad ostatními elementy
+    pointer-events: none; // Zajišťuje, že overlay nebude interferovat s interakcemi uživat
+}
+
+.logo {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%);
+    z-index: 15;
+}
+
+.line_horizontal_down {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    left: 0;
     bottom: 0;
-    background-image: url('path_to_your_image.jpg');
-    background-size: 100% 100%; 
-    background-repeat: no-repeat; 
+    width: 200%;
+    height: 2px;
+    background-color: $gold-color;
+}
+
+.line_horizontal_up{
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    left: 0;
+    bottom: 20px;
+    width: 200%;
+    height: 2px;
+    background-color: $gold-color;
+}
+
+.line_vertical_left {
+    position: absolute;
+    z-index: 10;
+    width: 2px;
+    height: 200%;
+    right: 21px;
+    top: 0;
+    background-color: $gold-color;
+}
+
+
+.line_vertical_right {
+    position: absolute;
+    z-index: 10;
+    width: 2px;
+    height: 200%;
+    right: 0;
+    top: 0;
+    background-color: $gold-color;
 }

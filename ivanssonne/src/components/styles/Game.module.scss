@@ -7,10 +7,14 @@ $green-color: #00FF38;
 $blue-color: #0038FF;
 $red-color: #FF0000;
 
+
+body {
+    overflow: hidden;
+}
 /* Stylování celého scroll baru */
 ::-webkit-scrollbar {
-    width: 20px; /* šířka vertikálního scroll baru */
-    height: 20px; /* výška horizontálního scroll baru */
+    width: 24px; /* šířka vertikálního scroll baru */
+    height: 24px; /* výška horizontálního scroll baru */
 }
 
 /* Stylování dráhy (track) scroll baru */
@@ -21,8 +25,8 @@ $red-color: #FF0000;
 /* Stylování posuvníku (thumb) */
 ::-webkit-scrollbar-thumb {
     background-color: $gold-color; /* barva posuvníku */
-    border-radius: 8px; /* zaoblení rohů posuvníku */
-    border: 4px solid #252525; /* okraj posuvníku */
+    border-radius: 16px; /* zaoblení rohů posuvníku */
+    border: 8px solid #252525; /* okraj posuvníku */
     transition: all 0.2 ease; /* plynulý přechod při změně barvy */
 }
 
@@ -32,7 +36,7 @@ $red-color: #FF0000;
     cursor: pointer; 
 }
 ::-webkit-scrollbar-corner {
-    background-color: #252525; /* Změňte barvu podle potřeby */
+    background-color: $gold-color; /* Změňte barvu podle potřeby */
 }
 
 
@@ -45,9 +49,10 @@ $red-color: #FF0000;
 
     .game__aside {
         position: absolute;
-        top: 0;
-        right: 20px;
+        top: 2rem;
+        opacity: 0;
+        right: 2rem;
         background-color: blue;
-        z-index: 0;
+        z-index: 30;
     }
 }

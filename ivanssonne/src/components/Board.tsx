@@ -3,8 +3,8 @@ import styles from './styles/Board.module.scss';
 import { GameContext } from '../providers/GameProvider';
 import EmptyPiece from './EmptyPiece';
 import Piece, { PieceType } from './Piece';
-import backgroundoverlay from '../assets/overlay-green.svg';
-
+import backgroundoverlay from '../assets/overlay-blue.png';
+import logo from '../assets/logo_background.png';
 
 interface BoardProps {}
 
@@ -23,6 +23,8 @@ const Board: React.FC<BoardProps> = () => {
 
     const gameContext = useContext(GameContext);
 
+
+    
     useEffect(() => {
         if (boardRef.current) {
             const { scrollWidth, clientWidth, scrollHeight, clientHeight } = boardRef.current;
@@ -64,20 +66,36 @@ const Board: React.FC<BoardProps> = () => {
     }
 
     return (
-        <div
-            ref={boardRef}
-            className={styles.board}
-            style={{ gridTemplateColumns, gridTemplateRows }}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-        >
-            {emptyPieces.map((emptyPiece) => {
-               return gameContext.state.placedPieces.some((piece: PieceType) => piece.positionX === emptyPiece.props.x && piece.positionY === emptyPiece.props.y) ?
-               gameContext.state.placedPieces.filter((piece: PieceType) => piece.positionX === emptyPiece.props.x && piece.positionY === emptyPiece.props.y).map((piece: PieceType) => <Piece key={piece.id} piece={piece} />) :
-               emptyPiece;
-           })}
+        <div className={styles.boardContainer} style={{ position: 'relative' }}>
+            <img className={styles["logo"]} src={logo} alt="Logo" />
+            <div className={styles["line_horizontal_down"]}></div>
+            <div className={styles["line_horizontal_up"]}></div>
+            <div className={styles["line_vertical_left"]}></div>
+            <div className={styles["line_vertical_right"]}></div>
+            <div
+                ref={boardRef}
+                className={styles.board}
+                style={{ gridTemplateColumns, gridTemplateRows }}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+            >
+                {emptyPieces.map((emptyPiece) => {
+                    return gameContext.state.placedPieces.some((piece: PieceType) => piece.positionX === emptyPiece.props.x && piece.positionY === emptyPiece.props.y) ?
+                    gameContext.state.placedPieces.filter((piece: PieceType) => piece.positionX === emptyPiece.props.x && piece.positionY === emptyPiece.props.y).map((piece: PieceType) => <Piece key={piece.id} piece={piece} />) :
+                    emptyPiece;
+                })}
+            </div>
+            <div className={styles["board_overlay"]} style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundImage: `url(${backgroundoverlay})`,
+                pointerEvents: 'none',
+            }} />
         </div>
     );
 };
