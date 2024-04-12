@@ -4,7 +4,7 @@ import { GameContext } from '../providers/GameProvider';
 import EmptyPiece from './EmptyPiece';
 import Piece, { PieceType } from './Piece';
 import backgroundoverlay from '../assets/overlay-blue.png';
-import logo from '../assets/logo_background.png';
+import logo from '../assets/logo.svg';
 
 interface BoardProps {}
 
@@ -67,7 +67,9 @@ const Board: React.FC<BoardProps> = () => {
 
     return (
         <div className={styles.boardContainer} style={{ position: 'relative' }}>
-            <img className={styles["logo"]} src={logo} alt="Logo" />
+            <div className={styles["trapezoid"]}>
+                <img className={styles["logo"]} src={logo} alt="Logo" />
+            </div>
             <div className={styles["line_horizontal_down"]}></div>
             <div className={styles["line_horizontal_up"]}></div>
             <div className={styles["line_vertical_left"]}></div>

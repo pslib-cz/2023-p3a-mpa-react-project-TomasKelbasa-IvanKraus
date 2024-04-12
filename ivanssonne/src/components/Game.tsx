@@ -4,6 +4,7 @@ import { GameActionTypes, GameContext, getInfoOfRoadOrTown, StructureInfoType, d
 import Piece from './Piece';
 import styles from './styles/Game.module.scss';
 
+interface GameProps {}
 
 function onlyUnique(value:any, index:number, array:any[]) {
     if(value === null || value === undefined) return false;
@@ -77,25 +78,23 @@ export const endOfTurn = (gameContext: GameContextType) => {
 }
 
 const Game: React.FC<GameProps> = () => {
-    
-    
     const gameContext = useContext(GameContext);
 
     const handlePassTurn = () => {
         endOfTurn(gameContext);
-    }
+    };
 
     const handleReset = () => {
         gameContext.dispatch({type: GameActionTypes.RESET_GAME});
-    }
+    };
 
     const handleRotateRight = () => {
         gameContext.dispatch({type: GameActionTypes.ROTATE_CURRENT_PIECE, direction: 'right'});
-    }
+    };
 
     const handleGetNewPiece = () => {
         gameContext.dispatch({type: GameActionTypes.GET_NEW_PIECE});
-    }
+    };
 
     useEffect(() => {
         gameContext.dispatch({type: GameActionTypes.RESET_GAME});
@@ -109,35 +108,46 @@ const Game: React.FC<GameProps> = () => {
         ];
     };
 
+    const players = gameContext.state.players;
+    const firstPlayerColor = players.length > 0 ? players[0].meepleColor : 'transparent';
+    const secondPlayerColor = players.length > 1 ? players[1].meepleColor : 'transparent';
+    const gradientDirection = gameContext.state.currentPlayerId === players[0]?.id ? 'to bottom' : 'to top';
+    const currentPlayerColor = gameContext.state.players.find(player => player.id === gameContext.state.currentPlayerId)?.meepleColor || 'transparent';
 
     return (
         <div className={styles["game"]}>
             <Board />
             <aside className={styles["game__aside"]}>
-                <div>
-                    {sortedPlayers().map(player => (
-                        <div key={player.id}>
-                            <h3>{player.name}{(gameContext.state.currentPlayerId === player.id ? " - playing" : "")}</h3>
-                            <p>Meeples: {player.numberOfMeeples}</p>
-                            <p>Score: {player.score}</p>
-                            <p>Color: {player.meepleColor}</p>
-                        </div>
-                    ))}
-                </div>
-                <p>{gameContext.state.unplacedPieces.length} zbývajících dílků</p>
-                <div style={{width: "100px", height: "100px"}}>
-                    {gameContext.state.currentPiece ? <Piece piece={gameContext.state.currentPiece} /> : <p>Žádný dílek</p>}
-                </div>
-                <button onClick={handleRotateRight}>Rotate</button>
-                {gameContext.state.currentPieceImpossibleToPlace ? (
-                    <div>
-                        <p>Nelze položit tento dílek.</p>
-                        <button onClick={handleGetNewPiece}>Get other piece</button>
+                <div className={styles["aside__players"]} style={{ background: `linear-gradient(${gradientDirection}, ${firstPlayerColor}, ${secondPlayerColor})` }}>
+                    <div className={styles["content"]}>
+                        {sortedPlayers().map(player => (
+                            <div key={player.id}>
+                                <h3>{player.name}{gameContext.state.currentPlayerId === player.id ? " - playing" : ""}</h3>
+                                <p>Meeples: {player.numberOfMeeples}</p>
+                                <p>Score: {player.score}</p>
+                                <p>Color: {player.meepleColor}</p>
+                            </div>
+                        ))}
+                        <p>{gameContext.state.unplacedPieces.length} zbývajících dílků</p>
                     </div>
-                ) : null}
-                {gameContext.state.currentPiece === null && gameContext.state.currentlyPlacedPieceId !== null ? (
-                    <button onClick={handlePassTurn}>Pass turn</button>
-                ) : null}
+                </div>
+                <div className={styles["aside__tile"]} style={{ border: `3px solid 
+                ${currentPlayerColor}
+                ` }}>
+                    <button className={styles["rotate"]} onClick={handleRotateRight}>Rotate</button>
+                    <div style={{width: "100px", height: "100px"}}>
+                        {gameContext.state.currentPiece ? <Piece piece={gameContext.state.currentPiece} /> : <p className={styles["notile"]}></p>}
+                    </div>
+                    {gameContext.state.currentPieceImpossibleToPlace ? (
+                        <div>
+                            <p>Nelze položit tento dílek.</p>
+                            <button onClick={handleGetNewPiece}>Get other piece</button>
+                        </div>
+                    ) : null}
+                    {gameContext.state.currentPiece === null && gameContext.state.currentlyPlacedPieceId !== null ? (
+                        <button className={styles["passturn"]} onClick={handlePassTurn}>Přeskočit tah</button>
+                    ) : null}
+                </div>
             </aside>
         </div>
     );

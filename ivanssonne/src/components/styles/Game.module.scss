@@ -48,11 +48,112 @@ body {
     position: relative;
 
     .game__aside {
-        position: absolute;
-        top: 2rem;
-        opacity: 0;
-        right: 2rem;
-        background-color: blue;
         z-index: 30;
+        font-family: 'Lindsay', sans-serif;
+        .aside__players {
+            position: absolute;
+            color: white;
+            background: linear-gradient(#FF0000, #0038FF); 
+            opacity: 1;
+            z-index: 2;
+            right: 2rem;
+            top: 30%;
+            transform: translateY(-30%);
+            padding: 3px;
+            border-radius: 0.5rem;
+
+
+            .content {
+                background: linear-gradient(to left, #1E2021, #323436);
+                padding: 1rem;
+                border-radius: 0.5rem;
+                width: 18.75rem;
+            }
+        }
+    
+        .aside__tile {
+            position: absolute;
+            color: white;
+            background: linear-gradient(to left, #1E2021, #323436);
+            opacity: 1;
+            border: 3px solid $beige-color;
+            right: 2rem;
+            width: 18.75rem;
+            bottom: 30%;
+            transform: translateY(20%);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            display: flex;  
+            justify-content: space-between;
+            align-items: center;
+
+            button {
+                &:hover {
+                    cursor: pointer;
+                }
+            }
+
+            button.passturn {
+                opacity: 1;
+                position: relative;
+                color: transparent;
+                background: transparent;
+                width:  100px;
+                height: 100px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border: none;
+
+                &:after {
+                    content: '';
+                    background-image: url('../../assets/passturn.svg');
+                    background-size: cover;
+                    width: 50%;
+                    height: 50%;
+                    display: block;
+                    z-index: 100;
+                    position: absolute;
+                }
+            }
+
+            p.notile {
+                color: $beige-color;
+                font-size: 1.5rem;
+            }
+            button.rotate {
+                opacity: 1;
+                position: relative;
+                color: transparent;
+                background: transparent;
+                width:  100px;
+                height: 100px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border: none;
+                &:hover {
+                    cursor: pointer;
+                }
+
+                &:after {
+                    content: '';
+                    background-image: url('../../assets/rotate-icon.svg');
+                    background-size: cover;
+                    width: 50%;
+                    height: 50%;
+                    display: block;
+                    z-index: 100;
+                    position: absolute;
+                }
+            }
+
+            img {
+                border: 2px solid $beige-color;
+                &:hover {
+                    cursor: pointer;
+                }
+            }
+        }
     }
 }
