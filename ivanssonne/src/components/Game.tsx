@@ -35,7 +35,6 @@ export const endOfTurn = (gameContext: GameContextType) => {
     // roads
     const closedRoads: StructureInfoType[] = currentlyPlacedPiece?.tile.roads.map(r => getInfoOfRoadOrTown(currentlyPlacedPiece, [r.sides[0]], gameContext.state, "R")).filter(infor => infor !== undefined && infor.closed) ?? [];
     for(let i = 0; i < closedRoads.length; i++){
-        console.log("closedRoads", closedRoads)
         let road = closedRoads[i];
         if(road.meeples.length === 0) continue
         let scoringPlayers = determineScoringPlayers(road.meeples);

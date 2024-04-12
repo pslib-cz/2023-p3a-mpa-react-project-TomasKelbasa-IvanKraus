@@ -188,7 +188,6 @@ export const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
                 positionInPiece: action.position,
                 state: null
             }
-            console.log(meeple);
             return {
                 ...state,
                 meeples: [...state.meeples, meeple],
@@ -204,7 +203,6 @@ export const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
         case GameActionTypes.ROTATE_CURRENT_PIECE:
             if(state.currentPiece === null) return state;
             const rotatedPiece = rotatePiece(state.currentPiece, action.direction === 'left' ? 3 : 1);
-            console.log(rotatedPiece);
             return {
                 ...state,
                 currentPiece: rotatedPiece,
@@ -358,7 +356,6 @@ export const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
             if(settingsContext.state.typeOfGame === TypeOfGame.PVP){
                 players.push({id: uuidv4(), name: settingsContext.state.firstName, score: 0, meepleColor: settingsContext.state.firstColor, numberOfMeeples: 8})
                 players.push({id: uuidv4(), name: settingsContext.state.secondName, score: 0, meepleColor: settingsContext.state.secondColor, numberOfMeeples: 8})
-                console.log("pushing")
             }
             else if(settingsContext.state.typeOfGame === TypeOfGame.PVC){
                 // TODO
@@ -431,8 +428,7 @@ const arePiecesCompatible = (piece1: PieceType, piece2: PieceType, piece1touchin
         default:
             throw new Error("Invalid side");
     }
-    console.log(piece1touchingSide, piece2touchingSide);
-
+    
     const piece1town = piece1.tile.towns.find(town => town.sides.find(a => a === piece1touchingSide) !== undefined) !== undefined;
     const piece2town = piece2.tile.towns.find(town => town.sides.find(a => a === piece2touchingSide) !== undefined) !== undefined;
     if(piece1town !== piece2town) return false;

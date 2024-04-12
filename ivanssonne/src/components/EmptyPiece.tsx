@@ -35,7 +35,7 @@ const EmptyPiece: React.FC<EmptyPieceProps> = React.memo(({ x, y }) => {
     });
 
     return (
-        <div ref={drop} className={styles["piece--empty"]} style={{ gridColumn: x, gridRow: y, backgroundColor: backgroundColor }} />
+        <div id={`${x} - ${y}`} ref={drop} className={styles["piece--empty"]} style={{ gridColumn: x, gridRow: y, backgroundColor: backgroundColor }} />
     );
 });
 
