@@ -25,7 +25,7 @@ https://www.figma.com/file/5vMA4hZmWaYrlaBD8ajpZP/Untitled?type=design&node-id=0
 
 ### Techniky
 
-- ❌ využití localStorage / sessionStorage
+- ✔️ využití localStorage / sessionStorage
 - ❌ čtení dat z externího RestAPI (fetch)
 - ✔️ operace DnD
 - ✔️ využití react-routeru

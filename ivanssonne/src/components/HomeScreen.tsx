@@ -1,7 +1,7 @@
-import React, { FormEvent, useContext, useRef, useState } from 'react';
+import React, { FormEvent, useContext, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Dropdown from 'react-dropdown';
-import { SettingsContext, MeepleColors, SettingsActionTypes, TypeOfGame } from '../providers/SettingsProvider';
+import { SettingsContext, MeepleColors, SettingsActionTypes, TypeOfGame, SettingsType, settingsReducer } from '../providers/SettingsProvider';
 import logo from '../assets/logo.png';
 import styles from './styles/HomeScreen.module.scss';
 
@@ -38,7 +38,10 @@ const HomeScreen = () => {
         }, 3000); 
     };
 
-    const handleSettingsSubmit = (e) => {
+    const firstName = useRef<HTMLInputElement>(null);
+    const secondName = useRef<HTMLInputElement>(null);
+
+    const handleSettingsSubmit = (e: FormEvent) => {
         e.preventDefault();
         settingsContext.dispatch({type: SettingsActionTypes.SET_FIRST_NAME, payload: firstName.current?.value ?? "Hráč1"});
         settingsContext.dispatch({type: SettingsActionTypes.SET_SECOND_NAME, payload: secondName.current?.value ?? "Hráč2"});
@@ -49,8 +52,11 @@ const HomeScreen = () => {
         displaySuccessMessage();
     };
 
-    const firstName = useRef(null);
-    const secondName = useRef(null);
+
+    useEffect(() => {
+        sessionStorage.setItem('settings', JSON.stringify(settingsContext.state));
+        console.log("saving to session storage");
+    }, [settingsContext.state]);
 
     const [firstColor, setFirstColor] = useState('');
     const [secondColor, setSecondColor] = useState('');

@@ -47,25 +47,27 @@ const initialSettingsReducerState: SettingsType = {
     typeOfGame: TypeOfGame.PVP
 }
 
+export const settingsReducer = (state: SettingsType, action: SettingsAction) => {
+    switch(action.type){
+        case SettingsActionTypes.SET_FIRST_NAME:
+            return {...state, firstName: action.payload as string};
+        case SettingsActionTypes.SET_SECOND_NAME:
+            return {...state, secondName: action.payload as string};
+        case SettingsActionTypes.SET_FIRST_COLOR:
+            return {...state, firstColor: action.payload as MeepleColors};
+        case SettingsActionTypes.SET_SECOND_COLOR:
+            return {...state, secondColor: action.payload as MeepleColors};
+        case SettingsActionTypes.SET_TYPE_OF_GAME:
+            return {...state, typeOfGame: action.payload as TypeOfGame};
+        default:
+            return state;
+    }
+}
+
 export const SettingsContext = createContext<SettingsContextType>({state: initialSettingsReducerState, dispatch: () => {}});
 
 export const SettingsProvider: React.FC<PropsWithChildren> = ({children}) => {
-    const [state, dispatch] = useReducer((state: SettingsType, action: SettingsAction) => {
-        switch(action.type){
-            case SettingsActionTypes.SET_FIRST_NAME:
-                return {...state, firstName: action.payload as string};
-            case SettingsActionTypes.SET_SECOND_NAME:
-                return {...state, secondName: action.payload as string};
-            case SettingsActionTypes.SET_FIRST_COLOR:
-                return {...state, firstColor: action.payload as MeepleColors};
-            case SettingsActionTypes.SET_SECOND_COLOR:
-                return {...state, secondColor: action.payload as MeepleColors};
-            case SettingsActionTypes.SET_TYPE_OF_GAME:
-                return {...state, typeOfGame: action.payload as TypeOfGame};
-            default:
-                return state;
-        }
-    }, initialSettingsReducerState);
+    const [state, dispatch] = useReducer(settingsReducer, initialSettingsReducerState);
 
     return (
         <SettingsContext.Provider value={{state, dispatch}}>
