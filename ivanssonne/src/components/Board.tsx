@@ -20,6 +20,15 @@ const Board: React.FC<BoardProps> = () => {
 
     const gameContext = useContext(GameContext);
 
+    useEffect(() => {
+        if (boardRef.current) {
+            const { scrollWidth, clientWidth, scrollHeight, clientHeight } = boardRef.current;
+            const scrollX = (scrollWidth - clientWidth) / 2;
+            const scrollY = (scrollHeight - clientHeight) / 2;
+            boardRef.current.scrollLeft = scrollX;
+            boardRef.current.scrollTop = scrollY;
+        }
+    }, []); 
 
     const handleMouseDown = (e: React.MouseEvent) => {
         setIsDragging(true);
