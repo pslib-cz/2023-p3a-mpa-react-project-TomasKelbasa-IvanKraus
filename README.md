@@ -4,7 +4,7 @@
 - [Tomáš Kelbasa](https://github.com/TomasKelbasa) - brainstorm professional, fullstack programmer, cybernetic specialist, scratch senior programmer
   <img src="ivanssonne/src/assets/tomas.webp" width="1080px" height="250px" alt="Tomas">
 - [Ivan Kraus](https://github.com/KrausIvan) - Browser engine optimizer, react optimizer, memo optimizer, figma specialist, fullstack developer, network engineer, UX & UI designer, copywritter, big data specialist
-  <img src="ivanssonne/src/assets/image.png" width="1080px" height="250px" alt="Yvan">
+  <img src="ivanssonne/src/assets/image.png" width="1080px" height="200px" alt="Yvan">
 
 ## Téma
 
