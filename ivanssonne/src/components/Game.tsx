@@ -4,8 +4,6 @@ import { GameActionTypes, GameContext, getInfoOfRoadOrTown, StructureInfoType, d
 import Piece from './Piece';
 import styles from './styles/Game.module.scss';
 
-interface GameProps {
-}
 
 function onlyUnique(value:any, index:number, array:any[]) {
     if(value === null || value === undefined) return false;
@@ -111,6 +109,7 @@ const Game: React.FC<GameProps> = () => {
             ...players.filter(p => p.id !== currentPlayerId)
         ];
     };
+
 
     return (
         <div className={styles["game"]}>
