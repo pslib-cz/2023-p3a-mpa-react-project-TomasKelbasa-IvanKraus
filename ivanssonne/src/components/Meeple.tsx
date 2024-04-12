@@ -7,7 +7,6 @@ interface MeepleProps {
 }
 
 const Meeple: React.FC<MeepleProps> = ({meeple}) => {
-    // Add your component logic here
 
     const gameContext = useContext(GameContext);
     let className = styles["meeple"];

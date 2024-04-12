@@ -13,6 +13,12 @@ $black-color: #000000;
 $green-color: #00FF38;
 $blue-color: #0038FF;
 $red-color: #FF0000;
+body {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* Internet Explorer/Edge */
+  user-select: none;         /* Non-prefixed version, currently supported by Chrome, Opera and Edge */
+}
 
 /*! normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css */
 

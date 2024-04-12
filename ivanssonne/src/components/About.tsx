@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import navod from '../assets/Reactssonne-navod-1.pdf';
+import navod from '../assets/Reactssonne-navod.pdf';
 import styles from './styles/About.module.scss';
 import logo from '../assets/logo.png';
 

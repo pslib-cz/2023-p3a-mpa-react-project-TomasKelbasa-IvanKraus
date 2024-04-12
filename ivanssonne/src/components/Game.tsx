@@ -3,6 +3,10 @@ import Board from './Board';
 import { GameActionTypes, GameContext, getInfoOfRoadOrTown, StructureInfoType, determineScoringPlayers, GameContextType } from '../providers/GameProvider';
 import Piece from './Piece';
 import styles from './styles/Game.module.scss';
+import star from '../assets/star-icon.svg';
+import home from '../assets/home-icon.svg';
+import { useNavigate } from 'react-router-dom';
+import music from '../assets/sound-icon.svg';
 
 interface GameProps {}
 
@@ -107,6 +111,25 @@ const Game: React.FC<GameProps> = () => {
             ...players.filter(p => p.id !== currentPlayerId)
         ];
     };
+    const navigate = useNavigate();
+
+    const handleGoHome = () => {
+        navigate('/');
+    };
+
+    type MeepleColor = 'black' | 'blue' | 'green' | 'red' | 'yellow';
+    const meepleImages: Record<MeepleColor, string> = {
+        black: '/src/assets/S-BLACK-MEEPLE.png',
+        blue: '/src/assets/S-BLUE-MEEPLE.png',
+        green: '/src/assets/S-GREEN-MEEPLE.png',
+        red: '/src/assets/S-RED-MEEPLE.png',
+        yellow: '/src/assets/S-YELLOW-MEEPLE.png',
+    };
+    function getMeepleImage(color: string): string {
+        const lowerCaseColor = color.toLowerCase() as MeepleColor;
+        return meepleImages[lowerCaseColor] || meepleImages.black;
+    }
+
 
     const players = gameContext.state.players;
     const firstPlayerColor = players.length > 0 ? players[0].meepleColor : 'transparent';
@@ -121,14 +144,32 @@ const Game: React.FC<GameProps> = () => {
                 <div className={styles["aside__players"]} style={{ background: `linear-gradient(${gradientDirection}, ${firstPlayerColor}, ${secondPlayerColor})` }}>
                     <div className={styles["content"]}>
                         {sortedPlayers().map(player => (
-                            <div key={player.id}>
-                                <h3>{player.name}{gameContext.state.currentPlayerId === player.id ? " - playing" : ""}</h3>
-                                <p>Meeples: {player.numberOfMeeples}</p>
-                                <p>Score: {player.score}</p>
-                                <p>Color: {player.meepleColor}</p>
+                            <div className={styles["player"]} key={player.id}>
+                                <h3>{player.name}</h3>
+                                <div className={styles["player__stats"]}>
+                                    <div>
+                                        <p>{player.numberOfMeeples}×</p>
+                                        <img
+                                            className={styles["meeple_icon"]}
+                                            src={getMeepleImage(player.meepleColor)}
+                                            alt="Meeple"
+                                        />
+                                    </div>
+                                    <p><img className={styles["star_icon"]} src={star}></img> {player.score}</p>
+                                </div>
                             </div>
                         ))}
-                        <p>{gameContext.state.unplacedPieces.length} zbývajících dílků</p>
+
+                        <div className={styles["settings"]}>
+                            <div>
+                                <button className={styles["button_home"]} onClick={handleGoHome}><img src={home} alt='Domů'></img></button>
+                                {gameContext.state.currentPiece === null && gameContext.state.currentlyPlacedPieceId !== null ? (
+                                <button className={styles["button_passturn"]} onClick={handlePassTurn}>Ukončit tah</button>
+                                ) :                                 <button className={styles["button_passturn--unactive"]} onClick={handlePassTurn}>Ukončit tah</button>}
+                           <button className={styles["button_music"]} onClick={handleGoHome}><img src={music} alt='Domů'></img></button>
+                            </div>
+                                <p className={styles["left_pieces"]}>Zbývajících dílků: <span>{gameContext.state.unplacedPieces.length}</span></p>
+                        </div>
                     </div>
                 </div>
                 <div className={styles["aside__tile"]} style={{ border: `3px solid 
@@ -139,13 +180,10 @@ const Game: React.FC<GameProps> = () => {
                         {gameContext.state.currentPiece ? <Piece piece={gameContext.state.currentPiece} /> : <p className={styles["notile"]}></p>}
                     </div>
                     {gameContext.state.currentPieceImpossibleToPlace ? (
-                        <div>
+                        <div className={styles["cant_put"]}>
                             <p>Nelze položit tento dílek.</p>
                             <button onClick={handleGetNewPiece}>Get other piece</button>
                         </div>
-                    ) : null}
-                    {gameContext.state.currentPiece === null && gameContext.state.currentlyPlacedPieceId !== null ? (
-                        <button className={styles["passturn"]} onClick={handlePassTurn}>Přeskočit tah</button>
                     ) : null}
                 </div>
             </aside>

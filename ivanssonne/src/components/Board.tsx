@@ -21,9 +21,25 @@ const Board: React.FC<BoardProps> = () => {
     const [startX, setStartX] = useState(0);
     const [startY, setStartY] = useState(0);
 
+    const [overlayImage, setOverlayImage] = useState('');
+
+    const overlayImages = {
+        black: "overlay-black.png",
+        blue: "overlay-blue.png",
+        green: "overlay-green.png",
+        red: "overlay-red.png",
+        yellow: "overlay-yellow.png"
+    };
+
     const gameContext = useContext(GameContext);
 
+    const currentPlayerColor = gameContext.state.players.find(player => player.id === gameContext.state.currentPlayerId)?.meepleColor || 'transparent';
 
+    useEffect(() => {
+        import(`../assets/overlay-${currentPlayerColor.toLowerCase()}.png`)
+            .then(image => setOverlayImage(image.default))
+            .catch(() => setOverlayImage('../assets/overlay-black.png'));
+    }, [currentPlayerColor]);
     
     useEffect(() => {
         if (boardRef.current) {
@@ -90,12 +106,12 @@ const Board: React.FC<BoardProps> = () => {
                 })}
             </div>
             <div className={styles["board_overlay"]} style={{
+                backgroundImage: `url(${overlayImage})`,
                 position: 'absolute',
                 top: 0,
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundImage: `url(${backgroundoverlay})`,
                 pointerEvents: 'none',
             }} />
         </div>

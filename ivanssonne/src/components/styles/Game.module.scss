@@ -50,6 +50,13 @@ body {
     .game__aside {
         z-index: 30;
         font-family: 'Lindsay', sans-serif;
+
+        .notile {
+            background-color: $beige-color;
+            width: 100px;
+            height: 100px;
+            margin-top: 0rem;
+        }
         .aside__players {
             position: absolute;
             color: white;
@@ -57,9 +64,9 @@ body {
             opacity: 1;
             z-index: 2;
             right: 2rem;
-            top: 30%;
-            transform: translateY(-30%);
-            padding: 3px;
+            top: 35%;
+            transform: translateY(-50%);
+            padding: 4px;
             border-radius: 0.5rem;
 
 
@@ -67,18 +74,160 @@ body {
                 background: linear-gradient(to left, #1E2021, #323436);
                 padding: 1rem;
                 border-radius: 0.5rem;
-                width: 18.75rem;
+                width: 15rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                position: relative;
+                min-height: 25rem;
+
+                .player {
+                    font-size: 2.25rem;
+                    h3 {
+                        font-size: 3rem;
+                        text-align: center;
+                        margin: 0;
+                        color: $gold-color;
+                        font-weight: 500;
+                    }
+                    .meeple_icon {
+                        width: 3.5rem;
+                    }
+                    .star {
+                        width: 2rem;
+                    }
+                    .player__stats {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-top: -2rem;
+
+                        div {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        }
+                    }
+                }
+                .settings {
+                    position: absolute;
+                    top: 50%;
+                    right: 50%;
+                    transform: translate(50%, -50%);
+                    button {
+                        background-color: transparent;
+                        border: none;
+                        &:hover {
+                            cursor: pointer;
+                        }
+                    }
+                    .button_passturn {
+                        background-color: $gold-color;
+                        border: 2px solid $gold-color;
+                        color: $gold-color;
+                        padding: 0.5rem 1rem;
+                        font-size: 1.5rem;
+                        border-radius: 0.5rem;
+                        color: black;
+                        font-weight: 500;
+                    }
+
+                    .button_passturn--unactive {
+                        background-color: transparent;
+                        border: 2px solid $gold-color;
+                        color: $gold-color;
+                        padding: 0.5rem 1rem;
+                        font-size: 1.5rem;
+                        border-radius: 0.5rem;
+                        opacity: 0.5;
+                        pointer-events: none;
+                    }
+                    div {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        width: 15rem;
+                    }
+                    p {
+                        margin-top: 0.5rem;
+                        font-size: 1.5rem;
+                        font-family: 'crimson-text', serif;
+                        text-align: center;
+                        color: $beige-color;
+                        span {
+                            color: white;
+                        }
+                    }
+                }
+
+                .player:nth-child(2) {
+                    h3 {
+                        color: $beige-color;
+                    }
+                    margin-bottom: -2rem;
+                    opacity: 0.5;
+                }
             }
         }
     
+        .cant_put {
+        }
+
+        .aside__tile:has(.cant_put){
+           padding-bottom: 10rem;
+           margin-bottom: -6.5rem;
+           img {
+            opacity: 0.5;
+            pointer-events: none;
+           }
+           button.rotate {
+            opacity: 0.5;
+            pointer-events: none;
+            &::after {
+                opacity: 0.5;
+            }
+           }
+
+           .cant_put {
+            position: absolute;
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 75%;
+            text-align: center;
+            font-size: 1.35rem;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            button {
+                background-color: transparent;
+                border: 2px solid $gold-color;
+                color: $gold-color;
+                padding: 0.5rem 1rem;
+                font-size: 1.5rem;
+                border-radius: 0.5rem;
+                font-weight: 500;
+                opacity: 1;
+                transition: all 0.2s ease;
+                pointer-events: all;
+                &:hover {
+                    cursor: pointer;
+                    background-color: $gold-color;
+                    color: $black-color;
+                }
+            
+            }
+           }
+        }
+
         .aside__tile {
             position: absolute;
             color: white;
             background: linear-gradient(to left, #1E2021, #323436);
             opacity: 1;
-            border: 3px solid $beige-color;
+            border: 4px solid $beige-color;
             right: 2rem;
-            width: 18.75rem;
+            width: 15rem;
             bottom: 30%;
             transform: translateY(20%);
             padding: 1rem;
@@ -92,31 +241,6 @@ body {
                     cursor: pointer;
                 }
             }
-
-            button.passturn {
-                opacity: 1;
-                position: relative;
-                color: transparent;
-                background: transparent;
-                width:  100px;
-                height: 100px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                border: none;
-
-                &:after {
-                    content: '';
-                    background-image: url('../../assets/passturn.svg');
-                    background-size: cover;
-                    width: 50%;
-                    height: 50%;
-                    display: block;
-                    z-index: 100;
-                    position: absolute;
-                }
-            }
-
             p.notile {
                 color: $beige-color;
                 font-size: 1.5rem;
