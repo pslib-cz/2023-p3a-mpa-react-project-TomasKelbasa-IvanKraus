@@ -1,4 +1,4 @@
-# Město Ivanssonne
+# Město Reactssonne
 
 ## Developeři
 - [Tomáš Kelbasa](https://github.com/TomasKelbasa) - brainstorm professional, fullstack programmer, cybernetic specialist, scratch senior programmer
