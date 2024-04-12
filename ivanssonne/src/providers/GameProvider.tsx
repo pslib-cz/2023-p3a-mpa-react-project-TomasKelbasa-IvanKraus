@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { SettingsContext, TypeOfGame, MeepleColors } from './SettingsProvider';
 
 
-const firstPiecePosition = [10, 10];
+const firstPiecePosition = [25, 25];
 
 export enum GameActionTypes {
     RESET_GAME,

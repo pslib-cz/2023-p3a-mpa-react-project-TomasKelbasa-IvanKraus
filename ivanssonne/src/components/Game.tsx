@@ -103,51 +103,42 @@ const Game: React.FC<GameProps> = () => {
         gameContext.dispatch({type: GameActionTypes.RESET_GAME});
     }, []);
 
+    const sortedPlayers = () => {
+        const { players, currentPlayerId } = gameContext.state;
+        return [
+            ...players.filter(p => p.id === currentPlayerId),
+            ...players.filter(p => p.id !== currentPlayerId)
+        ];
+    };
+
     return (
         <div className={styles["game"]}>
             <Board />
-            <aside>
-                <button onClick={handleReset}>Reset</button>
+            <aside className={styles["game__aside"]}>
                 <div>
-                    <h2>Players</h2>
-                    {
-                        gameContext.state.players.map(player =>                     
-                            <div>
-                                <h3>{player.name}{(gameContext.state.currentPlayerId === player.id ? " - playing" : null)}</h3>
-                                <p>Meeples: {player.numberOfMeeples}</p>
-                                <p>Score: {player.score}</p>
-                                <p>Color: {player.meepleColor}</p>
-                            </div>
-                        )
-                    }
-
-
+                    {sortedPlayers().map(player => (
+                        <div key={player.id}>
+                            <h3>{player.name}{(gameContext.state.currentPlayerId === player.id ? " - playing" : "")}</h3>
+                            <p>Meeples: {player.numberOfMeeples}</p>
+                            <p>Score: {player.score}</p>
+                            <p>Color: {player.meepleColor}</p>
+                        </div>
+                    ))}
                 </div>
-                <h2>Your piece</h2>
-                <p>{gameContext.state.unplacedPieces.length} other pieces remains</p>
+                <p>{gameContext.state.unplacedPieces.length} zbývajících dílků</p>
                 <div style={{width: "100px", height: "100px"}}>
-                    {
-                        (gameContext.state.currentPiece !== null) ? <Piece piece={gameContext.state.currentPiece} /> : <p>No piece</p>
-                    }
+                    {gameContext.state.currentPiece ? <Piece piece={gameContext.state.currentPiece} /> : <p>Žádný dílek</p>}
                 </div>
                 <button onClick={handleRotateRight}>Rotate</button>
-                {
-                    (gameContext.state.currentPieceImpossibleToPlace)
-                    ?
+                {gameContext.state.currentPieceImpossibleToPlace ? (
                     <div>
-                        <p>Impossible to place</p>
+                        <p>Nelze položit tento dílek.</p>
                         <button onClick={handleGetNewPiece}>Get other piece</button>
                     </div>
-                    :
-                    null
-                }
-                {
-                    (gameContext.state.currentPiece === null && gameContext.state.currentlyPlacedPieceId !== null)
-                    ?
+                ) : null}
+                {gameContext.state.currentPiece === null && gameContext.state.currentlyPlacedPieceId !== null ? (
                     <button onClick={handlePassTurn}>Pass turn</button>
-                    :
-                    null
-                }
+                ) : null}
             </aside>
         </div>
     );

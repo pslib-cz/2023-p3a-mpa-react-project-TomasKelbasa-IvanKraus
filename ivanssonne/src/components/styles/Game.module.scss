@@ -1,5 +1,51 @@
+$beige-color: #F0D9B5;
+$brown-color: #B58863;
+$gold-color: #EBC600;
+$yellow-color: #FFE500;
+$black-color: #000000;
+$green-color: #00FF38;
+$blue-color: #0038FF;
+$red-color: #FF0000;
+
+/* Stylování celého scroll baru */
+::-webkit-scrollbar {
+    width: 20px; /* šířka vertikálního scroll baru */
+    height: 20px; /* výška horizontálního scroll baru */
+}
+
+/* Stylování dráhy (track) scroll baru */
+::-webkit-scrollbar-track {
+    background: #252525; /* barva pozadí dráhy */
+}
+
+/* Stylování posuvníku (thumb) */
+::-webkit-scrollbar-thumb {
+    background-color: $gold-color; /* barva posuvníku */
+    border-radius: 8px; /* zaoblení rohů posuvníku */
+    border: 4px solid #252525; /* okraj posuvníku */
+    transition: all 0.2 ease; /* plynulý přechod při změně barvy */
+}
+
+/* Stylování posuvníku při najetí myši */
+::-webkit-scrollbar-thumb:hover {
+    background-color: #d6b601; /* tmavší barva při najetí myši */
+    cursor: pointer; 
+}
+::-webkit-scrollbar-corner {
+    background-color: #252525; /* Změňte barvu podle potřeby */
+}
+
 .game{
     display: flex;
     align-items: start;
     height: 100vh;
+    position: relative;
+
+    .game__aside {
+        position: absolute;
+        top: 0;
+        right: 20px;
+        background-color: blue;
+        z-index: 0;
+    }
 }
