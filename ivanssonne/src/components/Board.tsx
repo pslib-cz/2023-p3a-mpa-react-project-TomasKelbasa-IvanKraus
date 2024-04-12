@@ -62,8 +62,8 @@ const Board: React.FC<BoardProps> = () => {
     };
 
     const emptyPieces = [];
-    for (let i = 0; i < boardWidth; i++) {
-        for (let j = 0; j < boardHeight; j++) {
+    for (let i = 1; i < boardWidth+1; i++) {
+        for (let j = 1; j < boardHeight+1; j++) {
             emptyPieces.push(<EmptyPiece key={`${i}-${j}`} x={i} y={j} />);
         }
     }
