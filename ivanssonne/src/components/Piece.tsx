@@ -23,7 +23,7 @@ export type PieceType = {
 }
 
 
-const Piece: React.FC<PieceProps> = ({piece}) => {
+const Piece: React.FC<PieceProps> = React.memo(({ piece }) => {
     
     const defaultPathToImage = "/src/images/";
 
@@ -40,7 +40,8 @@ const Piece: React.FC<PieceProps> = ({piece}) => {
         setShouldEndTurn(true);
     }
 
-    // please dont judge me for this
+    // please dont judge me for this -
+    // to je fakt ******* :D - Ivan
     useEffect(() => {
         if (shouldEndTurn) {
             endOfTurn(gameContext);
@@ -127,13 +128,15 @@ const Piece: React.FC<PieceProps> = ({piece}) => {
                 <img
                     className={styles["piece__img"]}
                     src={`${defaultPathToImage}${piece.tile.imgname}`}
-                    style={{transform: transform}}
-                    />
+                    loading="lazy"
+                    style={{ transform: transform }}
+                    alt="Game Piece"
+                />
             </div>
         );
     }
 
     
-};
+});
 
 export default Piece;
