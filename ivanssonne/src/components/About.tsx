@@ -9,7 +9,7 @@ const About: React.FC = () => {
         <div className={styles["about"]}>
             <img src={logo} className={styles["about__logo"]} alt="logo"/>
             <embed src={navod} className={styles["about__pdf"]} width="1200" height="1080" type="application/pdf"/>
-            <Link className={styles["button--back"]} to="/">Back to Home</Link>
+            <Link className={styles["button--back"]} to="/">Zpátky</Link>
         </div>
     );
 };
