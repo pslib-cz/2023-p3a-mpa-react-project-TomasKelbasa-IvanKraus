@@ -7,25 +7,27 @@ import styles from './styles/EmptyPiece.module.scss';
 type EmptyPieceProps = {
     x: number;
     y: number;
+    active: boolean;
 };
 
 export enum DndTypes {
     PIECE = "piece"
 }
 
-const getBackgroundColor = (x: number, y: number, possiblePlacements: number[][]) => {
+const getBackgroundColor = (x: number, y: number, active: boolean) => {
     const beige = "#F0D9B5";
     const darkbeige = "#B58863";
     let backgroundColor = (x + y) % 2 === 0 ? beige : darkbeige;
-    if (possiblePlacements.some((placement) => placement[0] === x && placement[1] === y)) {
+    if (active) {
         backgroundColor = "green";
     }
     return backgroundColor;
 };
 
-const EmptyPiece: React.FC<EmptyPieceProps> = React.memo(({ x, y }) => {
+const EmptyPiece: React.FC<EmptyPieceProps> = React.memo(({ x, y, active }) => {
+
+    const backgroundColor = useMemo(() => getBackgroundColor(x, y, active), [x, y, active]);
     const gameContext = useContext(GameContext);
-    const backgroundColor = useMemo(() => getBackgroundColor(x, y, gameContext.state.possiblePiecePlacements), [x, y, gameContext.state.possiblePiecePlacements]);
 
     const [, drop] = useDrop({
         accept: DndTypes.PIECE,
@@ -34,8 +36,12 @@ const EmptyPiece: React.FC<EmptyPieceProps> = React.memo(({ x, y }) => {
         }
     });
 
-    return (
+    if(active) return (
         <div id={`${x} - ${y}`} ref={drop} className={styles["piece--empty"]} style={{ gridColumn: x, gridRow: y, backgroundColor: backgroundColor }} />
+    );
+
+    else return (
+        <div id={`${x} - ${y}`} className={styles["piece--empty"]} style={{ gridColumn: x, gridRow: y, backgroundColor: backgroundColor }} />
     );
 });
 

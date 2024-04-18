@@ -48,8 +48,9 @@ const initialSettingsReducerState: SettingsType = {
 }
 
 export const settingsReducer = (state: SettingsType, action: SettingsAction) => {
+    if(action.payload === null || (action.payload as string).length <= 0) return state;
     switch(action.type){
-        case SettingsActionTypes.SET_FIRST_NAME:
+        case SettingsActionTypes.SET_FIRST_NAME:  
             return {...state, firstName: action.payload as string};
         case SettingsActionTypes.SET_SECOND_NAME:
             return {...state, secondName: action.payload as string};

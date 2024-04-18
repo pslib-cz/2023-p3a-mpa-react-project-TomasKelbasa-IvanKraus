@@ -77,7 +77,7 @@ const Board: React.FC<BoardProps> = () => {
     const emptyPieces = [];
     for (let i = 1; i < boardWidth+1; i++) {
         for (let j = 1; j < boardHeight+1; j++) {
-            emptyPieces.push(<EmptyPiece key={`${i}-${j}`} x={i} y={j} />);
+            emptyPieces.push(<EmptyPiece key={`${i}-${j}`} x={i} y={j} active={gameContext.state.possiblePiecePlacements.find(u => u[0] === i && u[1] === j) !== undefined}/>);
         }
     }
 
