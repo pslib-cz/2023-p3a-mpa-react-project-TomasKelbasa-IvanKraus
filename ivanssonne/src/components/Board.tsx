@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState, useEffect } from 'react';
+import React, { useContext, useRef, useState, useEffect, useMemo, memo } from 'react';
 import styles from './styles/Board.module.scss';
 import { GameContext } from '../providers/GameProvider';
 import EmptyPiece from './EmptyPiece';
@@ -81,6 +81,16 @@ const Board: React.FC<BoardProps> = () => {
         }
     }
 
+    const boarOverlay = useMemo(() => <div className={styles["board_overlay"]} style={{
+        backgroundImage: `url(${overlayImage})`,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        pointerEvents: 'none',
+    }} />, [overlayImage])
+
     return (
         <div className={styles.boardContainer} style={{ position: 'relative' }}>
             <div className={styles["trapezoid"]}>
@@ -105,15 +115,7 @@ const Board: React.FC<BoardProps> = () => {
                     emptyPiece;
                 })}
             </div>
-            <div className={styles["board_overlay"]} style={{
-                backgroundImage: `url(${overlayImage})`,
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                pointerEvents: 'none',
-            }} />
+            {boarOverlay}
         </div>
     );
 };
