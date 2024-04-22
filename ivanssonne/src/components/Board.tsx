@@ -1,9 +1,8 @@
-import React, { useContext, useRef, useState, useEffect, useMemo, memo } from 'react';
+import React, { useContext, useRef, useState, useEffect, useMemo } from 'react';
 import styles from './styles/Board.module.scss';
 import { GameContext } from '../providers/GameProvider';
 import EmptyPiece from './EmptyPiece';
 import Piece, { PieceType } from './Piece';
-import backgroundoverlay from '../assets/overlay-blue.png';
 import logo from '../assets/logo.svg';
 
 interface BoardProps {}
@@ -20,34 +19,34 @@ const Board: React.FC<BoardProps> = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [startY, setStartY] = useState(0);
-
+    const [overlayImages, setOverlayImages] = useState({});
     const [overlayImage, setOverlayImage] = useState('');
 
-    const overlayImages = {
-        black: "overlay-black.png",
-        blue: "overlay-blue.png",
-        green: "overlay-green.png",
-        red: "overlay-red.png",
-        yellow: "overlay-yellow.png"
-    };
-
     const gameContext = useContext(GameContext);
-
     const currentPlayerColor = gameContext.state.players.find(player => player.id === gameContext.state.currentPlayerId)?.meepleColor || 'transparent';
 
     useEffect(() => {
-        import(`../assets/overlay-${currentPlayerColor.toLowerCase()}.png`)
-            .then(image => setOverlayImage(image.default))
-            .catch(() => setOverlayImage('../assets/overlay-black.png'));
-    }, [currentPlayerColor]);
-    
+        const colors = ['black', 'blue', 'green', 'red', 'yellow'];
+        const images = {};
+        const promises = colors.map(color =>
+            import(`../assets/overlay-${color}.png`)
+            .then(image => { images[color] = image.default; })
+            .catch(() => { images[color] = '../assets/overlay-black.png'; })
+        );
+        Promise.all(promises).then(() => setOverlayImages(images));
+    }, []);
+
+    useEffect(() => {
+        setOverlayImage(overlayImages[currentPlayerColor.toLowerCase()] || '../assets/overlay-black.png');
+    }, [currentPlayerColor, overlayImages]);
+
     useEffect(() => {
         if (boardRef.current) {
             const { scrollWidth, clientWidth, scrollHeight, clientHeight } = boardRef.current;
             boardRef.current.scrollLeft = (scrollWidth - clientWidth) / 2;
             boardRef.current.scrollTop = (scrollHeight - clientHeight) / 2;
         }
-    }, []); 
+    }, []);
 
     const handleMouseDown = (e: React.MouseEvent) => {
         setIsDragging(true);
@@ -65,7 +64,7 @@ const Board: React.FC<BoardProps> = () => {
             setStartX(e.pageX);
             setStartY(e.pageY);
         } else {
-            setIsDragging(false); 
+            setIsDragging(false);
         }
     };
 
@@ -75,13 +74,13 @@ const Board: React.FC<BoardProps> = () => {
     };
 
     const emptyPieces = [];
-    for (let i = 1; i < boardWidth+1; i++) {
-        for (let j = 1; j < boardHeight+1; j++) {
+    for (let i = 1; i <= boardWidth; i++) {
+        for (let j = 1; j <= boardHeight; j++) {
             emptyPieces.push(<EmptyPiece key={`${i}-${j}`} x={i} y={j} active={gameContext.state.possiblePiecePlacements.find(u => u[0] === i && u[1] === j) !== undefined}/>);
         }
     }
 
-    const boarOverlay = useMemo(() => <div className={styles["board_overlay"]} style={{
+    const boardOverlay = useMemo(() => <div className={styles["board_overlay"]} style={{
         backgroundImage: `url(${overlayImage})`,
         position: 'absolute',
         top: 0,
@@ -115,7 +114,7 @@ const Board: React.FC<BoardProps> = () => {
                     emptyPiece;
                 })}
             </div>
-            {boarOverlay}
+            {boardOverlay}
         </div>
     );
 };

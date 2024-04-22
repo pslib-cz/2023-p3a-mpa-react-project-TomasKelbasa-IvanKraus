@@ -1,4 +1,3 @@
-import logo from './assets/logo.png'
 import './App.scss'
 import Game from './components/Game'
 import { Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from 'react-router-dom'
@@ -12,10 +11,10 @@ function App() {
   const settingsContext = useContext(SettingsContext);
 
   useEffect(() => {
-    let settingsFromStorage = sessionStorage.getItem('settings');
+    const settingsFromStorage = sessionStorage.getItem('settings');
     if(settingsFromStorage){
         console.log("loading from session storage")
-        let settings: SettingsType = JSON.parse(settingsFromStorage);
+        const settings: SettingsType = JSON.parse(settingsFromStorage);
         settingsContext.dispatch({type: SettingsActionTypes.SET_FIRST_NAME, payload: settings.firstName});
         settingsContext.dispatch({type: SettingsActionTypes.SET_SECOND_NAME, payload: settings.secondName});
         settingsContext.dispatch({type: SettingsActionTypes.SET_FIRST_COLOR, payload: settings.firstColor});

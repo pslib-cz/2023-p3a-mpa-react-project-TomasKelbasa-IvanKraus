@@ -3,11 +3,13 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://pslib-cz.github.io/2023-p3a-mpa-react-project-TomasKelbasa-IvanKraus/",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build --base=/2023-p3a-mpa-react-project-TomasKelbasa-IvanKraus/",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview", 
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "localforage": "^1.10.0",
@@ -33,6 +35,7 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "gh-pages": "^6.1.1",
     "sass": "^1.72.0",
     "typescript": "^5.2.2",
     "vite": "^5.1.6"
