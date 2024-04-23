@@ -1,6 +1,6 @@
 import './App.scss'
 import Game from './components/Game'
-import { Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from 'react-router-dom'
+import { Route, RouterProvider, createHashRouter, createRoutesFromElements } from 'react-router-dom'
 import HomeScreen from './components/HomeScreen'
 import About from './components/About'
 import { useContext, useEffect } from 'react'
@@ -22,7 +22,7 @@ function App() {
     }
 },[]);
 
-  const router = createBrowserRouter(
+  const router = createHashRouter(
     createRoutesFromElements(
       <>
         <Route path="/" element={<HomeScreen />} />
