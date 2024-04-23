@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { TileType } from '../../data/tile_type';
 import styles from './styles/Piece.module.scss';
-import { GameContext, gameReducer, GameActionTypes, getInfoOfRoadOrTown, isFieldEmpty } from '../providers/GameProvider';
-import { ConnectDragSource, useDrag } from 'react-dnd';
+import { GameContext, GameActionTypes, getInfoOfRoadOrTown, isFieldEmpty } from '../providers/GameProvider';
+import { useDrag } from 'react-dnd';
 import { DndTypes } from './EmptyPiece';
 import MeeplePlace from './MeeplePlace';
 import Meeple from './Meeple';
@@ -53,7 +53,7 @@ const Piece: React.FC<PieceProps> = React.memo(({ piece }) => {
     // if the piece is the current piece, we want to be able to drag it
     if(gameContext && gameContext.state.currentPiece && gameContext.state.currentPiece.id === piece.id){
 
-        const [collected, drag, dragPreview] = useDrag(() => ({
+        const [,drag] = useDrag(() => ({
             type: DndTypes.PIECE,
             item: {piece: piece},
         }));
@@ -69,7 +69,7 @@ const Piece: React.FC<PieceProps> = React.memo(({ piece }) => {
     }
     else{
 
-        let meeplePlaces: JSX.Element[] = []
+        const meeplePlaces: JSX.Element[] = []
 
         // monastery
         if(piece.tile.monastery){
@@ -108,7 +108,7 @@ const Piece: React.FC<PieceProps> = React.memo(({ piece }) => {
 
 
         // list of meeple components for this piece
-        let meeples: JSX.Element[] = gameContext.state.meeples
+        const meeples: JSX.Element[] = gameContext.state.meeples
         .filter((meeple) => meeple.positionX === piece.positionX && meeple.positionY === piece.positionY)
         .map((meeple) => <Meeple meeple={meeple} />);
 

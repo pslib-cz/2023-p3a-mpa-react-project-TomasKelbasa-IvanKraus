@@ -1,7 +1,6 @@
 import React, { useContext, useMemo } from 'react';
 import { useDrop } from 'react-dnd';
 import { GameActionTypes, GameContext } from '../providers/GameProvider';
-import { PieceType } from './Piece';
 import styles from './styles/EmptyPiece.module.scss';
 
 type EmptyPieceProps = {
@@ -31,7 +30,7 @@ const EmptyPiece: React.FC<EmptyPieceProps> = React.memo(({ x, y, active }) => {
 
     const [, drop] = useDrop({
         accept: DndTypes.PIECE,
-        drop: (item: PieceType) => {
+        drop: () => {
             gameContext.dispatch({type: GameActionTypes.PLACE_PIECE, locationX: x, locationY: y});
         }
     });

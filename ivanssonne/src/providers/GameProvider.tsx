@@ -1,4 +1,4 @@
-import React, { createContext, PropsWithChildren, Reducer, useContext, useId, useReducer } from 'react';
+import React, { createContext, PropsWithChildren, Reducer, useContext, useReducer } from 'react';
 import { PieceType } from '../components/Piece';
 import { Stack } from 'stack-typescript';
 import { RoadType, tilePayload, TileType, tileTypes, TownType } from '../../data/tile_type';

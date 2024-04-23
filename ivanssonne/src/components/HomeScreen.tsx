@@ -1,11 +1,10 @@
-import React, { FormEvent, useContext, useEffect, useRef, useState } from 'react';
+import { FormEvent, useContext, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Dropdown from 'react-dropdown';
-import { SettingsContext, MeepleColors, SettingsActionTypes, TypeOfGame, SettingsType, settingsReducer } from '../providers/SettingsProvider';
+import { SettingsContext, SettingsActionTypes, TypeOfGame } from '../providers/SettingsProvider';
 import logo from '../assets/logo.png';
 import styles from './styles/HomeScreen.module.scss';
 
-const ColorCircle = ({ color, onSelect, selected, selectable }) => {
+const ColorCircle = ({ color, onSelect, selected, selectable }: { color: string, onSelect: (color: string) => void, selected: boolean, selectable: boolean }) => {
     const circleStyle = {
         backgroundColor: color.toLowerCase(),
         width: '30px',

@@ -7,7 +7,9 @@ import logo from '../assets/logo.svg';
 
 interface BoardProps {}
 
-const lerp = (start, end, alpha) => (1 - alpha) * start + alpha * end;
+type OverlayImages = { [key: string]: string };
+
+const lerp = (start: number, end: number, alpha: number) => (1 - alpha) * start + alpha * end;
 
 const Board: React.FC<BoardProps> = () => {
     const boardWidth = 50;
@@ -19,7 +21,7 @@ const Board: React.FC<BoardProps> = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [startY, setStartY] = useState(0);
-    const [overlayImages, setOverlayImages] = useState({});
+    const [overlayImages, setOverlayImages] = useState<OverlayImages>({});
     const [overlayImage, setOverlayImage] = useState('');
 
     const gameContext = useContext(GameContext);
@@ -27,7 +29,7 @@ const Board: React.FC<BoardProps> = () => {
 
     useEffect(() => {
         const colors = ['black', 'blue', 'green', 'red', 'yellow'];
-        const images = {};
+        const images: { [key: string]: string } = {}; // Add index signature
         const promises = colors.map(color =>
             import(`../assets/overlay-${color}.png`)
             .then(image => { images[color] = image.default; })
@@ -52,7 +54,7 @@ const Board: React.FC<BoardProps> = () => {
         setIsDragging(true);
         setStartX(e.pageX);
         setStartY(e.pageY);
-        boardRef.current.style.cursor = 'grabbing';
+        if(boardRef && boardRef.current) boardRef.current.style.cursor = 'grabbing';
     };
 
     const handleMouseMove = (e: React.MouseEvent) => {
@@ -70,7 +72,7 @@ const Board: React.FC<BoardProps> = () => {
 
     const handleMouseUp = () => {
         setIsDragging(false);
-        boardRef.current.style.cursor = 'grab';
+        if(boardRef && boardRef.current) boardRef.current.style.cursor = 'grab';
     };
 
     const emptyPieces = [];

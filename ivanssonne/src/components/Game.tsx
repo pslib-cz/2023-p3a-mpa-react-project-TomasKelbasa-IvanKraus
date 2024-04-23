@@ -88,9 +88,6 @@ const Game: React.FC<GameProps> = () => {
         endOfTurn(gameContext);
     };
 
-    const handleReset = () => {
-        gameContext.dispatch({type: GameActionTypes.RESET_GAME});
-    };
 
     const handleRotateRight = () => {
         gameContext.dispatch({type: GameActionTypes.ROTATE_CURRENT_PIECE, direction: 'right'});
