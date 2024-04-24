@@ -141,13 +141,12 @@ const calculatePossiblePlacements = (state: GameState, cPiece: PieceType): numbe
                 }
                 
                 if(impossiblePlacements.find(ip => ip[0] === pos[0] && ip[1] === pos[1]) !== undefined) continue;
-                const statement = state.placedPieces.find(p => p.positionX === pos[0] && p.positionY === pos[1]) !== undefined;
-                if(statement){
+                if(state.placedPieces.find(p => p.positionX === pos[0] && p.positionY === pos[1]) !== undefined){
                     impossiblePlacements.push([...pos]);
                     continue;
                 }
                 if(arePiecesCompatible(piece, cPiece, i)){
-                    possiblePlacements.push([...pos]);
+                    if(possiblePlacements.find(a => a[0] === pos[0] && a[1] === pos[1]) === undefined) possiblePlacements.push([...pos]);
                 }
                 else{
                     impossiblePlacements.push([...pos]);
@@ -159,7 +158,34 @@ const calculatePossiblePlacements = (state: GameState, cPiece: PieceType): numbe
         return possiblePlacements.filter(p => impossiblePlacements.find(ip => ip[0] === p[0] && ip[1] === p[1]) === undefined);
 }
 
-export const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
+
+
+const initialGameReducerState: GameState = {
+    meeples: [],
+    placedPieces: [],
+    currentPiece: null,
+    currentPieceImpossibleToPlace: false,
+    currentlyPlacedPieceId: null,
+    possiblePiecePlacements: [],
+    players: [],
+    unplacedPieces: new Stack<PieceType>(),
+    currentPlayerId: ''
+}
+
+export type GameContextType = {
+    state: GameState
+    dispatch: React.Dispatch<GameAction>
+}
+
+export const GameContext = createContext<GameContextType>({state: initialGameReducerState, dispatch: () => {}});
+
+
+
+const GameProvider: React.FC<PropsWithChildren> = ({children}) => {
+
+    const settingsContext = useContext(SettingsContext);
+
+    const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
     switch (action.type) {
         case GameActionTypes.PLACE_PIECE:
             if(!state.currentPiece) return state;
@@ -351,7 +377,6 @@ export const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
             const currentPiece = stack.pop();
             
             let players: PlayerType[] = []
-            const settingsContext = useContext(SettingsContext);
 
             if(settingsContext.state.typeOfGame === TypeOfGame.PVP){
                 players.push({id: uuidv4(), name: settingsContext.state.firstName, score: 0, meepleColor: settingsContext.state.firstColor, numberOfMeeples: 8})
@@ -373,29 +398,6 @@ export const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
             return state;
     }
 }
-
-const initialGameReducerState: GameState = {
-    meeples: [],
-    placedPieces: [],
-    currentPiece: null,
-    currentPieceImpossibleToPlace: false,
-    currentlyPlacedPieceId: null,
-    possiblePiecePlacements: [],
-    players: [],
-    unplacedPieces: new Stack<PieceType>(),
-    currentPlayerId: ''
-}
-
-export type GameContextType = {
-    state: GameState
-    dispatch: React.Dispatch<GameAction>
-}
-
-export const GameContext = createContext<GameContextType>({state: initialGameReducerState, dispatch: () => {}});
-
-
-
-const GameProvider: React.FC<PropsWithChildren> = ({children}) => {
 
     const [state, dispatch] = useReducer(gameReducer, initialGameReducerState);
 

@@ -75,12 +75,8 @@ const Board: React.FC<BoardProps> = () => {
         if(boardRef && boardRef.current) boardRef.current.style.cursor = 'grab';
     };
 
-    const emptyPieces = [];
-    for (let i = 1; i <= boardWidth; i++) {
-        for (let j = 1; j <= boardHeight; j++) {
-            emptyPieces.push(<EmptyPiece key={`${i}-${j}`} x={i} y={j} active={gameContext.state.possiblePiecePlacements.find(u => u[0] === i && u[1] === j) !== undefined}/>);
-        }
-    }
+    const emptyPieces = gameContext.state.possiblePiecePlacements.map(u => <EmptyPiece key={`${u[0]}-${u[1]}`} x={u[0]} y={u[1]}/>);
+
 
     const boardOverlay = useMemo(() => <div className={styles["board_overlay"]} style={{
         backgroundImage: `url(${overlayImage})`,
@@ -91,6 +87,8 @@ const Board: React.FC<BoardProps> = () => {
         bottom: 0,
         pointerEvents: 'none',
     }} />, [overlayImage])
+
+    console.log(gameContext.state.possiblePiecePlacements);
 
     return (
         <div className={styles.boardContainer} style={{ position: 'relative' }}>
@@ -110,11 +108,10 @@ const Board: React.FC<BoardProps> = () => {
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
             >
-                {emptyPieces.map((emptyPiece) => {
-                    return gameContext.state.placedPieces.some((piece: PieceType) => piece.positionX === emptyPiece.props.x && piece.positionY === emptyPiece.props.y) ?
-                    gameContext.state.placedPieces.filter((piece: PieceType) => piece.positionX === emptyPiece.props.x && piece.positionY === emptyPiece.props.y).map((piece: PieceType) => <Piece key={piece.id} piece={piece} />) :
-                    emptyPiece;
-                })}
+                {...emptyPieces}
+                {...gameContext.state.placedPieces.map((piece: PieceType) => (
+                    <Piece key={piece.id} piece={piece} />
+                ))}
             </div>
             {boardOverlay}
         </div>
