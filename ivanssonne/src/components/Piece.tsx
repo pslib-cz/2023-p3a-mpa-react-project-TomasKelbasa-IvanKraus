@@ -7,6 +7,8 @@ import { DndTypes } from './EmptyPiece';
 import MeeplePlace from './MeeplePlace';
 import Meeple from './Meeple';
 import { endOfTurn } from './Game';
+import {images} from '../images/index.tsx';
+
 
 export interface PieceProps {
     piece: PieceType;
@@ -112,6 +114,7 @@ const Piece: React.FC<PieceProps> = React.memo(({ piece }) => {
         .filter((meeple) => meeple.positionX === piece.positionX && meeple.positionY === piece.positionY)
         .map((meeple) => <Meeple meeple={meeple} />);
 
+        console.log(piece.tile.imgname + " " + images[Number(piece.tile.imgname.charAt(0)) - Number('A')]);
 
         return (
             <div className={styles["piece"]} style={{gridColumn: gridColumn, gridRow: gridRow}}>
@@ -127,7 +130,7 @@ const Piece: React.FC<PieceProps> = React.memo(({ piece }) => {
                 }
                 <img
                     className={styles["piece__img"]}
-                    src={`${defaultPathToImage}${piece.tile.imgname}`}
+                    src={images[piece.tile.imgname.charCodeAt(0) - 'A'.charCodeAt(0)]}
                     loading="lazy"
                     style={{ transform: transform }}
                     alt="Game Piece"

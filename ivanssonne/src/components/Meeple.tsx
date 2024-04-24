@@ -1,10 +1,13 @@
 import React, { useContext } from 'react';
 import { MeepleType, GameContext } from '../providers/GameProvider';
 import styles from './styles/Meeple.module.scss';
+import { meeples } from '../assets/meeples.tsx';
 
 interface MeepleProps {
     meeple: MeepleType
 }
+
+type StandingType = "S" | "L";
 
 const Meeple: React.FC<MeepleProps> = ({meeple}) => {
 
@@ -12,7 +15,7 @@ const Meeple: React.FC<MeepleProps> = ({meeple}) => {
     let className = styles["meeple"];
 
     const color = gameContext.state.players.find(player => player.id === meeple.playerId)?.meepleColor;
-    const standingProperty: string = meeple.positionInPiece.length === 1 ? "S" : "L";
+    const standingProperty: StandingType = meeple.positionInPiece.length === 1 ? "S" : "L";
 
     if(meeple.positionInPiece.length === 1){
         switch(meeple.positionInPiece[0]){
@@ -65,8 +68,57 @@ const Meeple: React.FC<MeepleProps> = ({meeple}) => {
             
         }
     }
+
+    let meeplePath;
+
+    if(standingProperty === "S"){
+        switch(color){
+            case "BLACK":
+                meeplePath = meeples.SBLACK;
+                break;
+            case "BLUE":
+                meeplePath = meeples.SBLUE;
+                break;
+            case "GREEN":
+                meeplePath = meeples.SGREEN;
+                break;
+            case "RED":
+                meeplePath = meeples.SRED;
+                break;
+            case "YELLOW":
+                meeplePath = meeples.SYELLOW;
+                break;
+            default:
+                console.log("Invalid color");
+                break;    
+        }
+    }
+    else{
+        switch(color){
+            case "BLACK":
+                meeplePath = meeples.LBLACK;
+                break;
+            case "BLUE":
+                meeplePath = meeples.LBLUE;
+                break;
+            case "GREEN":
+                meeplePath = meeples.LGREEN;
+                break;
+            case "RED":
+                meeplePath = meeples.LRED;
+                break;
+            case "YELLOW":
+                meeplePath = meeples.LYELLOW;
+                break;
+            default:
+                console.log("Invalid color");
+                break;    
+        }
+    }
+
+
     return (
-        <img src={`./src/assets/${standingProperty}-${color}-MEEPLE.png`} alt="meeple" className={className}/>
+        <img src={meeplePath} alt="meeple" className={className}/>
     );
 };
 
