@@ -7,6 +7,8 @@ import star from '../assets/star-icon.svg';
 import home from '../assets/home-icon.svg';
 import { useNavigate } from 'react-router-dom';
 import music from '../assets/sound-icon.svg';
+import { meeples } from '../assets/meeples.tsx';
+import { MeepleColors } from '../providers/SettingsProvider.tsx';
 
 interface GameProps {}
 
@@ -97,6 +99,10 @@ const Game: React.FC<GameProps> = () => {
         gameContext.dispatch({type: GameActionTypes.GET_NEW_PIECE});
     };
 
+    const handleEndGame = () => {
+        gameContext.dispatch({type: GameActionTypes.END_GAME});
+    };
+
     useEffect(() => {
         gameContext.dispatch({type: GameActionTypes.RESET_GAME});
     }, []);
@@ -114,17 +120,30 @@ const Game: React.FC<GameProps> = () => {
         navigate('/');
     };
 
-    type MeepleColor = 'black' | 'blue' | 'green' | 'red' | 'yellow';
-    const meepleImages: Record<MeepleColor, string> = {
-        black: '/src/assets/S-BLACK-MEEPLE.png',
-        blue: '/src/assets/S-BLUE-MEEPLE.png',
-        green: '/src/assets/S-GREEN-MEEPLE.png',
-        red: '/src/assets/S-RED-MEEPLE.png',
-        yellow: '/src/assets/S-YELLOW-MEEPLE.png',
-    };
-    function getMeepleImage(color: string): string {
-        const lowerCaseColor = color.toLowerCase() as MeepleColor;
-        return meepleImages[lowerCaseColor] || meepleImages.black;
+    function getMeepleImage(color: MeepleColors): string {
+        let meeplePath;
+        switch(color){
+            case "BLACK":
+                meeplePath = meeples.SBLACK;
+                break;
+            case "BLUE":
+                meeplePath = meeples.SBLUE;
+                break;
+            case "GREEN":
+                meeplePath = meeples.SGREEN;
+                break;
+            case "RED":
+                meeplePath = meeples.SRED;
+                break;
+            case "YELLOW":
+                meeplePath = meeples.SYELLOW;
+                break;
+            default:
+                meeplePath = meeples.SBLACK;
+                console.log("Invalid color");
+                break;    
+        }
+        return meeplePath;
     }
 
 
@@ -160,29 +179,43 @@ const Game: React.FC<GameProps> = () => {
                         <div className={styles["settings"]}>
                             <div>
                                 <button className={styles["button_home"]} onClick={handleGoHome}><img src={home} alt='Domů'></img></button>
-                                {gameContext.state.currentPiece === null && gameContext.state.currentlyPlacedPieceId !== null ? (
-                                <button className={styles["button_passturn"]} onClick={handlePassTurn}>Ukončit tah</button>
-                                ) :                                 <button className={styles["button_passturn--unactive"]} onClick={handlePassTurn}>Ukončit tah</button>}
-                           <button className={styles["button_music"]} onClick={handleGoHome}><img src={music} alt='Domů'></img></button>
+                                {
+                                    gameContext.state.gameEnded
+                                    ? 
+                                    <button className={styles["button_endgame"]} onClick={handleEndGame}>Vyhodnotit</button>
+                                    :
+                                    (
+                                    gameContext.state.currentPiece === null && gameContext.state.currentlyPlacedPieceId !== null
+                                    ?
+                                    <button className={styles["button_passturn"]} onClick={handlePassTurn}>Ukončit tah</button>
+                                    :
+                                    <button className={styles["button_passturn--unactive"]} onClick={handlePassTurn}>Ukončit tah</button>
+                                    )
+                                }
+                                <button className={styles["button_music"]} onClick={handleGoHome}><img src={music} alt='Domů'></img></button>
                             </div>
                                 <p className={styles["left_pieces"]}>Zbývajících dílků: <span>{gameContext.state.unplacedPieces.length}</span></p>
                         </div>
                     </div>
                 </div>
-                <div className={styles["aside__tile"]} style={{ border: `3px solid 
-                ${currentPlayerColor}
-                ` }}>
-                    <button className={styles["rotate"]} onClick={handleRotateRight}>Rotate</button>
-                    <div style={{width: "100px", height: "100px"}}>
-                        {gameContext.state.currentPiece ? <Piece piece={gameContext.state.currentPiece} /> : <p className={styles["notile"]}></p>}
+                {
+                    (gameContext.state.gameEnded) ? null :
+                    <div className={styles["aside__tile"]} style={{ border: `3px solid ${currentPlayerColor}` }}>
+                        <button className={styles["rotate"]} onClick={handleRotateRight}>Rotate</button>
+                            <div style={{width: "100px", height: "100px"}}>
+                                {gameContext.state.currentPiece ? <Piece piece={gameContext.state.currentPiece} /> : <p className={styles["notile"]}></p>}
+                            </div>
+                            {
+                                gameContext.state.currentPieceImpossibleToPlace ? 
+                                <div className={styles["cant_put"]}>
+                                    <p>Nelze položit tento dílek.</p>
+                                    <button onClick={handleGetNewPiece}>Vzít si jiný dílek.</button>
+                                </div>
+                                :
+                                null
+                            }
                     </div>
-                    {gameContext.state.currentPieceImpossibleToPlace ? (
-                        <div className={styles["cant_put"]}>
-                            <p>Nelze položit tento dílek.</p>
-                            <button onClick={handleGetNewPiece}>Vzít si jiný dílek.</button>
-                        </div>
-                    ) : null}
-                </div>
+                }
             </aside>
         </div>
     );

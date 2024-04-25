@@ -16,7 +16,8 @@ export enum GameActionTypes {
     GET_NEW_PIECE,
     ROTATE_CURRENT_PIECE,
     REWARD_PLAYER,
-    REMOVE_MEEPLE
+    REMOVE_MEEPLE,
+    END_GAME
 }
 
 export type PlayerType = {
@@ -46,6 +47,7 @@ export type GameState = {
     players: PlayerType[],
     currentPlayerId: string,
     possiblePiecePlacements: number[][],
+    gameEnded: boolean
 }
 
 export type GameAction = {
@@ -71,6 +73,8 @@ export type GameAction = {
 } | {
     type: GameActionTypes.REMOVE_MEEPLE,
     meepleId: string
+} | {
+    type: GameActionTypes.END_GAME
 }
 /*
 *  all rotations must be done using this function!
@@ -169,7 +173,8 @@ const initialGameReducerState: GameState = {
     possiblePiecePlacements: [],
     players: [],
     unplacedPieces: new Stack<PieceType>(),
-    currentPlayerId: ''
+    currentPlayerId: '',
+    gameEnded: false
 }
 
 export type GameContextType = {
@@ -186,218 +191,231 @@ const GameProvider: React.FC<PropsWithChildren> = ({children}) => {
     const settingsContext = useContext(SettingsContext);
 
     const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
-    switch (action.type) {
-        case GameActionTypes.PLACE_PIECE:
-            if(!state.currentPiece) return state;
-            if(state.possiblePiecePlacements.find(p => p[0] === action.locationX && p[1] === action.locationY) === undefined) return state;
 
-            return {
-                ...state,
-                currentlyPlacedPieceId: state.currentPiece.id,
-                currentPiece: null,
-                possiblePiecePlacements: [],
-                placedPieces: [...state.placedPieces, {...state.currentPiece, positionX: action.locationX, positionY: action.locationY, placed: true} as PieceType]
-            }
-        case GameActionTypes.PLACE_MEEPLE:
-            let cPlayer  = state.players.find(p => p.id === state.currentPlayerId);
+        switch (action.type) {
+            case GameActionTypes.PLACE_PIECE:
+                if(!state.currentPiece) return state;
+                if(state.possiblePiecePlacements.find(p => p[0] === action.locationX && p[1] === action.locationY) === undefined) return state;
 
-            if(!cPlayer) return state;
-            if(cPlayer.numberOfMeeples <= 0) return state;
-
-            const cpp = state.placedPieces.find(p => p.id === state.currentlyPlacedPieceId);
-
-            const meeple: MeepleType = {
-                id: uuidv4(),
-                playerId: cPlayer.id,
-                positionX: cpp?.positionX as number,
-                positionY: cpp?.positionY as number,
-                positionInPiece: action.position,
-                state: null
-            }
-            return {
-                ...state,
-                meeples: [...state.meeples, meeple],
-                players: [...state.players.map(p => {
-                    if(p.id === cPlayer?.id){
-                        return {...cPlayer, numberOfMeeples: cPlayer.numberOfMeeples - 1};    
-                    }else{
-                        return p;
-                    }
-                })]
-            }
-
-        case GameActionTypes.ROTATE_CURRENT_PIECE:
-            if(state.currentPiece === null) return state;
-            const rotatedPiece = rotatePiece(state.currentPiece, action.direction === 'left' ? 3 : 1);
-            return {
-                ...state,
-                currentPiece: rotatedPiece,
-                possiblePiecePlacements: calculatePossiblePlacements(state, rotatedPiece)
-            }
-        case GameActionTypes.REMOVE_MEEPLE:
-        const meepleToRemove = state.meeples.find(m => m.id === action.meepleId);
-        if(!meepleToRemove) return state;
-        const playerToRemoveMeeple = state.players.find(p => p.id === meepleToRemove.playerId);
-        if(!playerToRemoveMeeple) return state;
-
-        return {
-            ...state,
-            meeples: state.meeples.filter(m => m.id !== action.meepleId),
-            players: state.players.map(p => {
-                if(p.id === playerToRemoveMeeple.id){
-                    return {...p, numberOfMeeples: p.numberOfMeeples + 1};
-                }else{
-                    return p;
+                return {
+                    ...state,
+                    currentlyPlacedPieceId: state.currentPiece.id,
+                    currentPiece: null,
+                    possiblePiecePlacements: [],
+                    placedPieces: [...state.placedPieces, {...state.currentPiece, positionX: action.locationX, positionY: action.locationY, placed: true} as PieceType]
                 }
-            })
-        }
+            case GameActionTypes.PLACE_MEEPLE:
+                let cPlayer  = state.players.find(p => p.id === state.currentPlayerId);
 
-        case GameActionTypes.REWARD_PLAYER:
-            const player = state.players.find(p => p.id === action.playerId);
-            if(!player) return state;
+                if(!cPlayer) return state;
+                if(cPlayer.numberOfMeeples <= 0) return state;
+
+                const cpp = state.placedPieces.find(p => p.id === state.currentlyPlacedPieceId);
+
+                const meeple: MeepleType = {
+                    id: uuidv4(),
+                    playerId: cPlayer.id,
+                    positionX: cpp?.positionX as number,
+                    positionY: cpp?.positionY as number,
+                    positionInPiece: action.position,
+                    state: null
+                }
+                return {
+                    ...state,
+                    meeples: [...state.meeples, meeple],
+                    players: [...state.players.map(p => {
+                        if(p.id === cPlayer?.id){
+                            return {...cPlayer, numberOfMeeples: cPlayer.numberOfMeeples - 1};    
+                        }else{
+                            return p;
+                        }
+                    })]
+                }
+
+            case GameActionTypes.ROTATE_CURRENT_PIECE:
+                if(state.currentPiece === null) return state;
+                const rotatedPiece = rotatePiece(state.currentPiece, action.direction === 'left' ? 3 : 1);
+                return {
+                    ...state,
+                    currentPiece: rotatedPiece,
+                    possiblePiecePlacements: calculatePossiblePlacements(state, rotatedPiece)
+                }
+            case GameActionTypes.REMOVE_MEEPLE:
+            const meepleToRemove = state.meeples.find(m => m.id === action.meepleId);
+            if(!meepleToRemove) return state;
+            const playerToRemoveMeeple = state.players.find(p => p.id === meepleToRemove.playerId);
+            if(!playerToRemoveMeeple) return state;
+
             return {
                 ...state,
+                meeples: state.meeples.filter(m => m.id !== action.meepleId),
                 players: state.players.map(p => {
-                    if(p.id === action.playerId){
-                        return {...p, score: p.score + action.score};
+                    if(p.id === playerToRemoveMeeple.id){
+                        return {...p, numberOfMeeples: p.numberOfMeeples + 1};
                     }else{
                         return p;
                     }
                 })
             }
-        
-        case GameActionTypes.END_TURN:
 
-            if(state.unplacedPieces.length <= 0){
+            case GameActionTypes.REWARD_PLAYER:
+                const player = state.players.find(p => p.id === action.playerId);
+                if(!player) return state;
+                return {
+                    ...state,
+                    players: state.players.map(p => {
+                        if(p.id === action.playerId){
+                            return {...p, score: p.score + action.score};
+                        }else{
+                            return p;
+                        }
+                    })
+                }
+            
+            case GameActionTypes.END_TURN:
 
-                //konec hry
+                if(state.unplacedPieces.length <= 0){
 
-                console.log("Game over");
-                return state;
-            }
-
-            const stackDupe = new Stack<PieceType>(...state.unplacedPieces);
-
-            let cPiece = stackDupe.pop();
-            let possiblePlacements = calculatePossiblePlacements(state, cPiece);
-
-            let rotations = 0;
-
-            const cPId = state.players.find(p => p.id !== state.currentPlayerId)?.id;
-            if(!cPId) throw new Error("Invalid player id");
-
-            while(possiblePlacements.length <= 0){
-                rotations++;
-                cPiece = rotatePiece(cPiece, 1);
-                possiblePlacements = calculatePossiblePlacements(state, cPiece);
-                if(rotations >= 4){
+                    console.log("Game over");
                     return {
                         ...state,
                         currentlyPlacedPieceId: null,
-                        currentPlayerId: cPId,
-                        currentPiece: cPiece,
-                        unplacedPieces: stackDupe,
+                        currentPiece: null,
                         possiblePiecePlacements: [],
-                        currentPieceImpossibleToPlace: true
-                    }
-                    
+                        gameEnded: true
+                    };
                 }
-            }
 
-            return {
-                ...state,
-                currentlyPlacedPieceId: null,
-                currentPlayerId: cPId,
-                currentPiece: cPiece,
-                unplacedPieces: stackDupe,
-                possiblePiecePlacements: possiblePlacements
-            }
+                const stackDupe = new Stack<PieceType>(...state.unplacedPieces);
 
-        case GameActionTypes.GET_NEW_PIECE:
-            if(!state.currentPieceImpossibleToPlace) return state;
-            const stackCopy = new Stack<PieceType>(...state.unplacedPieces);
+                let cPiece = stackDupe.pop();
+                let possiblePlacements = calculatePossiblePlacements(state, cPiece);
 
-            if(stackCopy.length <= 0){
+                let rotations = 0;
 
-                //konec hry
+                const cPId = state.players.find(p => p.id !== state.currentPlayerId)?.id;
+                if(!cPId) throw new Error("Invalid player id");
 
-                console.log("Game over");
-                return state;
-            }
+                while(possiblePlacements.length <= 0){
+                    rotations++;
+                    cPiece = rotatePiece(cPiece, 1);
+                    possiblePlacements = calculatePossiblePlacements(state, cPiece);
+                    if(rotations >= 4){
+                        return {
+                            ...state,
+                            currentlyPlacedPieceId: null,
+                            currentPlayerId: cPId,
+                            currentPiece: cPiece,
+                            unplacedPieces: stackDupe,
+                            possiblePiecePlacements: [],
+                            currentPieceImpossibleToPlace: true
+                        }
+                        
+                    }
+                }
 
-            let cp = stackCopy.pop();
-            let pp = calculatePossiblePlacements(state, cp);
+                return {
+                    ...state,
+                    currentlyPlacedPieceId: null,
+                    currentPlayerId: cPId,
+                    currentPiece: cPiece,
+                    unplacedPieces: stackDupe,
+                    possiblePiecePlacements: possiblePlacements
+                }
 
-            let rot = 0;
+            case GameActionTypes.GET_NEW_PIECE:
+                if(!state.currentPieceImpossibleToPlace) return state;
+                const stackCopy = new Stack<PieceType>(...state.unplacedPieces);
 
-            while(pp.length <= 0){
-                rot++;
-                cp = rotatePiece(cp, 1);
-                pp = calculatePossiblePlacements(state, cp);
-                if(rot >= 4){
+                if(stackCopy.length <= 0){
+
+                    console.log("Game over");
                     return {
                         ...state,
                         currentlyPlacedPieceId: null,
-                        currentPiece: cp,
-                        unplacedPieces: stackCopy,
+                        currentPiece: null,
                         possiblePiecePlacements: [],
-                        currentPieceImpossibleToPlace: true
+                        currentPieceImpossibleToPlace: false,
+                        gameEnded: true
+                    };
+                }
+
+                let cp = stackCopy.pop();
+                let pp = calculatePossiblePlacements(state, cp);
+
+                let rot = 0;
+
+                while(pp.length <= 0){
+                    rot++;
+                    cp = rotatePiece(cp, 1);
+                    pp = calculatePossiblePlacements(state, cp);
+                    if(rot >= 4){
+                        return {
+                            ...state,
+                            currentlyPlacedPieceId: null,
+                            currentPiece: cp,
+                            unplacedPieces: stackCopy,
+                            possiblePiecePlacements: [],
+                            currentPieceImpossibleToPlace: true
+                        }
                     }
                 }
-            }
 
-            return {
-                ...state,
-                currentlyPlacedPieceId: null,
-                currentPiece: cp,
-                unplacedPieces: stackCopy,
-                possiblePiecePlacements: pp,
-                currentPieceImpossibleToPlace: false
-            }
-
-        
-        case GameActionTypes.RESET_GAME:
-            const arr: PieceType[] = [];
-            tilePayload.forEach(tile => {
-                for(let i = 0; i < tile.value; i++) {
-                    const t: PieceType = {
-                        id: uuidv4(),
-                        placed: false,
-                        rotation: 0,
-                        positionX: 0,
-                        positionY: 0,
-                        tile: tileTypes.find(t => t.type === tile.letter) as TileType
-                    }
-                    arr.push(t);
+                return {
+                    ...state,
+                    currentlyPlacedPieceId: null,
+                    currentPiece: cp,
+                    unplacedPieces: stackCopy,
+                    possiblePiecePlacements: pp,
+                    currentPieceImpossibleToPlace: false
                 }
-            
-            });
-            arr.sort(() => Math.random() - 0.5);
-            const stack = new Stack<PieceType>(...arr);
-            const currentPiece = stack.pop();
-            
-            let players: PlayerType[] = []
 
-            if(settingsContext.state.typeOfGame === TypeOfGame.PVP){
-                players.push({id: uuidv4(), name: settingsContext.state.firstName, score: 0, meepleColor: settingsContext.state.firstColor, numberOfMeeples: 8})
-                players.push({id: uuidv4(), name: settingsContext.state.secondName, score: 0, meepleColor: settingsContext.state.secondColor, numberOfMeeples: 8})
-            }
-            else if(settingsContext.state.typeOfGame === TypeOfGame.PVC){
-                // TODO
-            }
+            
+            case GameActionTypes.RESET_GAME:
+                const arr: PieceType[] = [];
+                tilePayload.forEach(tile => {
+                    for(let i = 0; i < tile.value; i++) {
+                        const t: PieceType = {
+                            id: uuidv4(),
+                            placed: false,
+                            rotation: 0,
+                            positionX: 0,
+                            positionY: 0,
+                            tile: tileTypes.find(t => t.type === tile.letter) as TileType
+                        }
+                        arr.push(t);
+                    }
+                
+                });
+                arr.sort(() => Math.random() - 0.5);
+                const stack = new Stack<PieceType>(...arr);
+                const currentPiece = stack.pop();
+                
+                let players: PlayerType[] = []
 
-            return {
-                ...initialGameReducerState,
-                unplacedPieces: stack,
-                currentPiece: currentPiece,
-                currentPlayerId: players[0].id,
-                possiblePiecePlacements: [[...firstPiecePosition]],
-                players: players
-            };
-        default:
-            return state;
+                if(settingsContext.state.typeOfGame === TypeOfGame.PVP){
+                    players.push({id: uuidv4(), name: settingsContext.state.firstName, score: 0, meepleColor: settingsContext.state.firstColor, numberOfMeeples: 8})
+                    players.push({id: uuidv4(), name: settingsContext.state.secondName, score: 0, meepleColor: settingsContext.state.secondColor, numberOfMeeples: 8})
+                }
+                else if(settingsContext.state.typeOfGame === TypeOfGame.PVC){
+                    // TODO
+                }
+
+                return {
+                    ...initialGameReducerState,
+                    unplacedPieces: stack,
+                    currentPiece: currentPiece,
+                    currentPlayerId: players[0].id,
+                    possiblePiecePlacements: [[...firstPiecePosition]],
+                    players: players
+                };
+            case GameActionTypes.END_GAME:
+                return finalScoring(state);
+
+            default:
+                return state;
+        }
     }
-}
 
     const [state, dispatch] = useReducer(gameReducer, initialGameReducerState);
 
@@ -605,4 +623,98 @@ export const determineScoringPlayers = (meeples: MeepleType[]): string[] => {
     });
 
     return d.filter(p => p.value === max).map(a => a.key);
+}
+
+const finalScoring = (state: GameState): GameState => {
+
+    let copy = {...state};
+    const evaluatedMeeplesIds: string[] = [];
+    const fieldMeeplesIds: string[] = [];
+    state.meeples.forEach(meeple => {
+
+        // skip if meeple has already been evaluated
+        if(evaluatedMeeplesIds.find(id => id === meeple.id) !== undefined) return;
+
+        const piece = state.placedPieces.find(p => p.positionX === meeple.positionX && p.positionY === meeple.positionY);
+        // monastery
+        if(piece?.tile.monastery && meeple.positionInPiece.length === 1 && meeple.positionInPiece[0] === 5){
+            let score = 0;
+            for(let m = -1; m <= 1; m++){
+                for(let n = -1; n <= 1; n++){
+                    if(state.placedPieces.find(p => p.positionX === piece.positionX + m && p.positionY === piece.positionY + n) !== undefined) score++;
+                }
+            }
+            copy.players = copy.players.map(p => {
+                if(p.id === meeple.playerId){
+                    return {...p, score: p.score + score};
+                }
+                return p;
+            });
+        }
+        // fields for later
+        else if (meeple.positionInPiece.length === 2){
+            fieldMeeplesIds.push(meeple.id);
+            return;
+        }
+        else{
+            if(piece?.tile.roads.find(r => r.sides.find(s => s === meeple.positionInPiece[0]) !== undefined) !== undefined){
+                const info = getInfoOfRoadOrTown(piece, meeple.positionInPiece, state, "R");
+                const scoringPlayers = determineScoringPlayers(info.meeples);
+
+                const score = info.sides.map(a => `${a.pieceXpos}, ${a.pieceYpos}`).filter(onlyUnique).length;
+
+                // rewards players
+                scoringPlayers.forEach(sp => {
+                    copy.players = copy.players.map(p => {
+                        if(p.id === sp){
+                            return {...p, score: p.score + score};
+                        }
+                        return p;
+                    });
+                });
+                
+            }
+            else if(piece?.tile.towns.find(t => t.sides.find(s => s === meeple.positionInPiece[0]) !== undefined) !== undefined){
+                const info = getInfoOfRoadOrTown(piece, meeple.positionInPiece, state, "T");
+                const scoringPlayers = determineScoringPlayers(info.meeples);
+
+                // 1 point for each piece of the town
+                let score = info.sides.map(a => `${a.pieceXpos}, ${a.pieceYpos}`).filter(onlyUnique).length;
+
+                const bonusPiecesIds: string[] = [];
+
+                // searches for towns with erb (bonus) and adds the piece id to the bonusPiecesIds array
+                info.sides.forEach(s => {
+                    const p = state.placedPieces.find(p => p.positionX === s.pieceXpos && p.positionY === s.pieceYpos);
+                    if(p?.tile.towns.find(t => t.sides.find(side => side === s.side[0]) !== undefined)?.bonus){
+                        bonusPiecesIds.push(p.id);
+                    }
+                });
+
+                // 1 extra point for each erb in the town
+                score += bonusPiecesIds.filter(onlyUnique).length;
+
+                // rewards players
+                scoringPlayers.forEach(sp => {
+                    copy.players = copy.players.map(p => {
+                        if(p.id === sp){
+                            return {...p, score: p.score + score};
+                        }
+                        return p;
+                    });
+                });
+            }
+        }
+
+    });
+
+
+    // scoring for fields
+
+    return {...copy, meeples: []};
+}
+
+function onlyUnique(value:any, index:number, array:any[]) {
+    if(value === null || value === undefined) return false;
+    return array.indexOf(value) === index;
 }

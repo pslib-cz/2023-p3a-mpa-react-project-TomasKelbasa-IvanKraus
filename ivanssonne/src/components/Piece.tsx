@@ -7,7 +7,7 @@ import { DndTypes } from './EmptyPiece';
 import MeeplePlace from './MeeplePlace';
 import Meeple from './Meeple';
 import { endOfTurn } from './Game';
-import {images} from '../images/index.tsx';
+import { images } from '../images/index.tsx';
 
 export interface PieceProps {
     piece: PieceType;
