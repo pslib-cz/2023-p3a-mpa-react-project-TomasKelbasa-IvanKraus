@@ -4,7 +4,7 @@ import { GameContext } from '../providers/GameProvider';
 import EmptyPiece from './EmptyPiece';
 import Piece, { PieceType } from './Piece';
 import logo from '../assets/logo.svg';
-import tile from '../assets/tile.png';
+import tile from '../assets/tile-color.png';
 
 interface BoardProps {}
 
