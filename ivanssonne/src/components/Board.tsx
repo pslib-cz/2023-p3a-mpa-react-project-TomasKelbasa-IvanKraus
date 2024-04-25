@@ -4,6 +4,7 @@ import { GameContext } from '../providers/GameProvider';
 import EmptyPiece from './EmptyPiece';
 import Piece, { PieceType } from './Piece';
 import logo from '../assets/logo.svg';
+import tile from '../assets/tile.png';
 
 interface BoardProps {}
 
@@ -102,7 +103,7 @@ const Board: React.FC<BoardProps> = () => {
             <div
                 ref={boardRef}
                 className={styles.board}
-                style={{ gridTemplateColumns, gridTemplateRows }}
+                style={{ gridTemplateColumns, gridTemplateRows, backgroundImage: `url(${tile})`}}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}

@@ -13,6 +13,10 @@ div.board{
     max-height: 100vh;
     overflow-y: scroll;
     overflow-x: scroll;
+    background-size: 200px 200px;
+    background-repeat: repeat;
+    background-origin: content-box;
+    background-attachment: local;
 }
 
 .board_overlay { 
