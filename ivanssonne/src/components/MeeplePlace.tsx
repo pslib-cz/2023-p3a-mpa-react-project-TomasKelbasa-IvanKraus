@@ -10,8 +10,6 @@ const MeeplePlace: React.FC<MeeplePlaceProps> = ({ position, onClickHandler }) =
 
     let className = styles["meeple__place"];
 
-    console.log(position);
-
     if(position.length === 1){
         switch(position[0]){
             case 1:

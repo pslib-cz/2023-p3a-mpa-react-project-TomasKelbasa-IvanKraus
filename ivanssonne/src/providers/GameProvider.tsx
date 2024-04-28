@@ -47,7 +47,8 @@ export type GameState = {
     players: PlayerType[],
     currentPlayerId: string,
     possiblePiecePlacements: number[][],
-    gameEnded: boolean
+    gameEnded: boolean,
+    showResult: boolean
 }
 
 export type GameAction = {
@@ -174,7 +175,8 @@ const initialGameReducerState: GameState = {
     players: [],
     unplacedPieces: new Stack<PieceType>(),
     currentPlayerId: '',
-    gameEnded: false
+    gameEnded: false,
+    showResult: false
 }
 
 export type GameContextType = {
@@ -708,13 +710,138 @@ const finalScoring = (state: GameState): GameState => {
 
     });
 
+    const solvedFieldMeepleIds: string[] = [];
 
-    // scoring for fields
+    fieldMeeplesIds.forEach(meepleId => {
+        // skip if meeple has already been evaluated
+        if(solvedFieldMeepleIds.find(id => id === meepleId) !== undefined) return;
 
-    return {...copy, meeples: []};
+        const meeple = state.meeples.find(m => m.id === meepleId);
+        const piece = state.placedPieces.find(p => p.positionX === meeple?.positionX && p.positionY === meeple?.positionY);
+        if(!piece) return;
+        if(!meeple) return;
+
+        const info = getInfoOfField(piece.id, meeple.positionInPiece, state);
+        console.log(info);
+        // adds all meeples on the field to the solvedFieldMeepleIds array
+        solvedFieldMeepleIds.push(...info.meeples.map(m => m.id));
+
+        // determines the scoring players based on number of meeples on the field
+        const scoringPlayers = determineScoringPlayers(info.meeples);
+
+        const calculatedTownSides: PieceSidePair[] = [];
+
+        let score = 0;
+
+        info.sides.forEach(s => {
+            const p = state.placedPieces.find(p => p.positionX === s.pieceXpos && p.positionY === s.pieceYpos);
+            const newSide = (s.side[0] + (s.side[1] === 2 ? 1 : -1) - 1) % 4 + 1;
+
+            // checks if the side has already been calculated - if so, then there is no need to calculate it again (it would lead to double or more points for the same town)
+            if(calculatedTownSides.find(c => c.pieceXpos === s.pieceXpos && c.pieceYpos === s.pieceYpos
+                && c.side.find(a => a === newSide) !== undefined) !== undefined) return;
+
+            // checks if there is a town on newSide
+            if(p?.tile.towns.find(t => t.sides.find(side => side === newSide) !== undefined) !== undefined){
+
+                const tonwInfo = getInfoOfRoadOrTown(p, [newSide], state, "T");
+                calculatedTownSides.push(...tonwInfo.sides);
+
+                if(!tonwInfo.closed) return;
+                else score += 1;
+            }
+        });
+
+        // 3 points for each closed town
+        score *= 3;
+
+        // rewards players
+        scoringPlayers.forEach(sp => {
+            copy.players = copy.players.map(p => {
+                if(p.id === sp){
+                    return {...p, score: p.score + score};
+                }
+                return p;
+            });
+        });
+    });
+
+    return {...copy, meeples: [], showResult: true};
 }
 
 function onlyUnique(value:any, index:number, array:any[]) {
     if(value === null || value === undefined) return false;
     return array.indexOf(value) === index;
+}
+
+type FieldInfoType = {
+    meeples: MeepleType[],
+    sides: PieceSidePair[]
+}
+
+// uses recursion
+// gets all sides of the field and all meeples on the field
+const getInfoOfField = (pieceId: string, side: number[], state: GameState, visitedSides: PieceSidePair[] = []): FieldInfoType => {
+
+    const piece = state.placedPieces.find(p => p.id === pieceId);
+    if(!piece) throw new Error("Invalid piece id");
+
+    let field = piece.tile.fields.find(f => f.sides.find(s => s[0] === side[0] && s[1] == side[1]) !== undefined);
+
+    if(!field) throw new Error("Invalid side");
+
+    const meeples: MeepleType[] = [];
+
+    field.sides.forEach(s => {
+
+        // if side has already been visited, skip
+        if(visitedSides.find(v => v.pieceXpos === piece.positionX && v.pieceYpos === piece.positionY 
+            && v.side[0] === s[0] && v.side[1] === s[1]) !== undefined) return;
+
+        // searches for meeple on the side of piece
+        const meeple = state.meeples.find(m => m.positionX === piece.positionX && m.positionY === piece.positionY && m.positionInPiece.length === 2 && m.positionInPiece[0] === s[0] && m.positionInPiece[1] === s[1]);
+        if(meeple) meeples.push(meeple);
+
+
+        let nextPieceCoords: number[] = [];
+        let nextSide: number[] = [];
+
+        // calculates the next piece coordinates and the side of the next piece that is connected to the current piece
+        switch(s[0]){
+            case 1:
+                nextPieceCoords = [piece.positionX, piece.positionY + 1];
+                nextSide = [3];
+                break;
+            case 2:
+                nextPieceCoords = [piece.positionX - 1, piece.positionY];
+                nextSide = [4];
+                break;
+            case 3:
+                nextPieceCoords = [piece.positionX, piece.positionY - 1];
+                nextSide = [1];
+                break;
+            case 4:
+                nextPieceCoords = [piece.positionX + 1, piece.positionY];
+                nextSide = [2];
+                break;
+            default:
+                throw new Error("Invalid side");
+        }
+
+        // the nextSide has to be the opposite of the current side
+        nextSide.push(s[1]%2 + 1);
+
+        visitedSides.push({pieceXpos: piece.positionX, pieceYpos: piece.positionY, side: s});
+        const nextPiece = state.placedPieces.find(p => p.positionX === nextPieceCoords[0] && p.positionY === nextPieceCoords[1]);
+        if(nextPiece){
+            const recursionResult = getInfoOfField(nextPiece.id, nextSide, state, visitedSides);
+            meeples.push(...recursionResult.meeples);
+        }
+        
+    });
+
+    return {
+        meeples: meeples.map(m => m.id).filter(onlyUnique).map(id => state.meeples.find(m => m.id === id) as MeepleType),
+        sides: visitedSides
+    };
 }

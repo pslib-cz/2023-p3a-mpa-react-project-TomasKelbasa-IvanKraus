@@ -89,8 +89,6 @@ const Board: React.FC<BoardProps> = () => {
         pointerEvents: 'none',
     }} />, [overlayImage])
 
-    console.log(gameContext.state.possiblePiecePlacements);
-
     return (
         <div className={styles.boardContainer} style={{ position: 'relative' }}>
             <div className={styles["trapezoid"]}>
