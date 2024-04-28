@@ -155,11 +155,34 @@ const Game: React.FC<GameProps> = () => {
 
     return (
         <div className={styles["game"]}>
+            {gameContext.state.showResult ? 
+                <div className={styles["game__win_overlay"]}>
+                    <div className={styles["win_overlay"]}>
+                        <h1 className={styles["overlay__title"]}>Konec hry</h1>
+                        {gameContext.state.players.every(player => player.score === gameContext.state.players[0].score) ? (
+                            <h2 className={styles["content__draw"]}>Remíza</h2>
+                            
+                        ) : (
+                            gameContext.state.players.sort((a, b) => b.score - a.score).map((player, index) => (
+                                <div className={styles["overlay__content"]} key={index}>
+                                    {index === 0 ? (
+                                        <p className={styles["content__player"]}>Vítěz: {player.name}</p>
+                                    ) : (
+                                        <p className={styles["content__player"]}>Prohra: {player.name}</p>
+                                    )}
+                                    <p className={styles["content__score"]}>Skóre: {player.score}</p>
+                                </div>
+                            ))
+                        )}
+                        <button onClick={handleGoHome}>Domů</button>
+                    </div>
+                </div>
+            : null}
             <Board />
             <aside className={styles["game__aside"]}>
                 <div className={styles["aside__players"]} style={{ background: `linear-gradient(${gradientDirection}, ${firstPlayerColor}, ${secondPlayerColor})` }}>
                     <div className={styles["content"]}>
-                        {sortedPlayers().map(player => (
+                        {gameContext.state.players.map(player => (
                             <div className={styles["player"]} key={player.id}>
                                 <h3>{player.name}</h3>
                                 <div className={styles["player__stats"]}>
@@ -182,7 +205,7 @@ const Game: React.FC<GameProps> = () => {
                                 {
                                     gameContext.state.gameEnded
                                     ? 
-                                    <button className={styles["button_endgame"]} onClick={handleEndGame}>Vyhodnotit</button>
+                                    <button className={styles["button_endgame"]} onClick={handleEndGame}>Vyhodnocení</button>
                                     :
                                     (
                                     gameContext.state.currentPiece === null && gameContext.state.currentlyPlacedPieceId !== null
