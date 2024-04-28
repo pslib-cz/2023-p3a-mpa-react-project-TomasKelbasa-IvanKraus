@@ -182,7 +182,7 @@ const Game: React.FC<GameProps> = () => {
             <aside className={styles["game__aside"]}>
                 <div className={styles["aside__players"]} style={{ background: `linear-gradient(${gradientDirection}, ${firstPlayerColor}, ${secondPlayerColor})` }}>
                     <div className={styles["content"]}>
-                        {gameContext.state.players.map(player => (
+                        {sortedPlayers().map(player => (
                             <div className={styles["player"]} key={player.id}>
                                 <h3>{player.name}</h3>
                                 <div className={styles["player__stats"]}>
