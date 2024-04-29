@@ -179,6 +179,7 @@ const Game: React.FC<GameProps> = () => {
                 </div>
             : null}
             <Board />
+            <button className={styles["button_home"]} onClick={handleGoHome}><img src={home} alt='Domů'></img></button>
             <aside className={styles["game__aside"]}>
                 <div className={styles["aside__players"]} style={{ background: `linear-gradient(${gradientDirection}, ${firstPlayerColor}, ${secondPlayerColor})` }}>
                     <div className={styles["content"]}>
@@ -201,7 +202,6 @@ const Game: React.FC<GameProps> = () => {
 
                         <div className={styles["settings"]}>
                             <div>
-                                <button className={styles["button_home"]} onClick={handleGoHome}><img src={home} alt='Domů'></img></button>
                                 {
                                     gameContext.state.gameEnded
                                     ? 
@@ -215,7 +215,6 @@ const Game: React.FC<GameProps> = () => {
                                     <button className={styles["button_passturn--unactive"]} onClick={handlePassTurn}>Ukončit tah</button>
                                     )
                                 }
-                                <button className={styles["button_music"]} onClick={handleGoHome}><img src={music} alt='Domů'></img></button>
                             </div>
                                 <p className={styles["left_pieces"]}>Zbývajících dílků: <span>{gameContext.state.unplacedPieces.length}</span></p>
                         </div>

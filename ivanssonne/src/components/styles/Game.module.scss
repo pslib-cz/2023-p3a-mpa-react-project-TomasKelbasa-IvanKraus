@@ -46,6 +46,24 @@ body {
     align-items: start;
     height: 100vh;
     position: relative;
+    .button_home {
+        position: absolute;
+        width: 5rem;
+        height: 5rem;
+        border-radius: 0 0 1rem 0;
+        box-shadow: 0 0 10px black;
+        background: linear-gradient(to left, #1E2021, #323436);
+        left: 0;
+        border: none;
+        transition: all 0.3s ease;
+        top: 0;
+        z-index: 100;
+        &:hover {
+            cursor: pointer;
+            box-shadow: 0 0 10px $gold-color;
+
+        }
+    }
 
     .game__win_overlay {
         position: absolute;
@@ -218,7 +236,7 @@ body {
                     }
                     div {
                         display: flex;
-                        justify-content: space-between;
+                        justify-content: center;
                         align-items: center;
                         width: 15rem;
                     }
