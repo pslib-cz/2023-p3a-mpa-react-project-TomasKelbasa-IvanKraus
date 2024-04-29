@@ -30,7 +30,7 @@ const Board: React.FC<BoardProps> = () => {
 
     useEffect(() => {
         const colors = ['black', 'blue', 'green', 'red', 'yellow'];
-        const images: { [key: string]: string } = {}; // Add index signature
+        const images: { [key: string]: string } = {}; 
         const promises = colors.map(color =>
             import(`../assets/overlay-${color}.png`)
             .then(image => { images[color] = image.default; })

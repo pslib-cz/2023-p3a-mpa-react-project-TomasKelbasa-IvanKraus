@@ -12,20 +12,49 @@ export enum DndTypes {
     PIECE = "piece"
 }
 
-
 const EmptyPiece: React.FC<EmptyPieceProps> = ({ x, y }) => {
-
+    const { state, dispatch } = useContext(GameContext);
     const backgroundColor = "green";
-    const gameContext = useContext(GameContext);
 
     const [, drop] = useDrop({
         accept: DndTypes.PIECE,
         drop: () => {
-            gameContext.dispatch({type: GameActionTypes.PLACE_PIECE, locationX: x, locationY: y});
-        }
+            dispatch({
+                type: GameActionTypes.PLACE_PIECE,
+                locationX: x,
+                locationY: y
+            });
+        },
+        collect: monitor => ({
+            isOver: monitor.isOver(),
+            canDrop: monitor.canDrop(),
+        }),
     });
 
-    return <div id={`${x} - ${y}`} ref={drop} className={styles["piece--empty"]} style={{ gridColumn: x, gridRow: y, backgroundColor: backgroundColor }} />
+    const handleClick = () => {
+        if (state.currentPiece) {
+            dispatch({
+                type: GameActionTypes.PLACE_PIECE,
+                locationX: x,
+                locationY: y
+            });
+        }
+    };
+
+    return (
+        <div
+            ref={drop}
+            id={`${x}-${y}`}
+            className={styles["piece--empty"]}
+            style={{
+                gridColumn: x,
+                gridRow: y,
+                backgroundColor: state.currentPiece && !backgroundColor ? 'pointer' : backgroundColor,
+                cursor: state.currentPiece ? 'pointer' : 'not-allowed'
+            }}
+            onClick={handleClick}
+        />
+    );
 };
 
 export default EmptyPiece;

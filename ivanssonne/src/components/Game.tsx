@@ -150,7 +150,7 @@ const Game: React.FC<GameProps> = () => {
     const players = gameContext.state.players;
     const firstPlayerColor = players.length > 0 ? players[0].meepleColor : 'transparent';
     const secondPlayerColor = players.length > 1 ? players[1].meepleColor : 'transparent';
-    const gradientDirection = gameContext.state.currentPlayerId === players[0]?.id ? 'to bottom' : 'to top';
+    const gradientDirection = 'to bottom';
     const currentPlayerColor = gameContext.state.players.find(player => player.id === gameContext.state.currentPlayerId)?.meepleColor || 'transparent';
 
     return (
@@ -163,7 +163,7 @@ const Game: React.FC<GameProps> = () => {
                             <h2 className={styles["content__draw"]}>Remíza</h2>
                             
                         ) : (
-                            gameContext.state.players.sort((a, b) => b.score - a.score).map((player, index) => (
+                            gameContext.state.players.map((player, index) => (
                                 <div className={styles["overlay__content"]} key={index}>
                                     {index === 0 ? (
                                         <p className={styles["content__player"]}>Vítěz: {player.name}</p>
@@ -182,8 +182,8 @@ const Game: React.FC<GameProps> = () => {
             <aside className={styles["game__aside"]}>
                 <div className={styles["aside__players"]} style={{ background: `linear-gradient(${gradientDirection}, ${firstPlayerColor}, ${secondPlayerColor})` }}>
                     <div className={styles["content"]}>
-                        {sortedPlayers().map(player => (
-                            <div className={styles["player"]} key={player.id}>
+                        {gameContext.state.players.map(player => (
+                            <div className={styles["player"]} key={player.id} style={{ opacity: player.id !== gameContext.state.currentPlayerId ? 0.2 : 1 }}>
                                 <h3>{player.name}</h3>
                                 <div className={styles["player__stats"]}>
                                     <div>
