@@ -6,7 +6,6 @@ import styles from './styles/Game.module.scss';
 import star from '../assets/star-icon.svg';
 import home from '../assets/home-icon.svg';
 import { useNavigate } from 'react-router-dom';
-import music from '../assets/sound-icon.svg';
 import { meeples } from '../assets/meeples.tsx';
 import { MeepleColors } from '../providers/SettingsProvider.tsx';
 
@@ -106,14 +105,14 @@ const Game: React.FC<GameProps> = () => {
     useEffect(() => {
         gameContext.dispatch({type: GameActionTypes.RESET_GAME});
     }, []);
-
+    /*
     const sortedPlayers = () => {
         const { players, currentPlayerId } = gameContext.state;
         return [
             ...players.filter(p => p.id === currentPlayerId),
             ...players.filter(p => p.id !== currentPlayerId)
         ];
-    };
+    };*/
     const navigate = useNavigate();
 
     const handleGoHome = () => {
