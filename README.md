@@ -11,20 +11,11 @@
 ## Téma
 
 Předělávka známé deskové hry [Carcassonne](https://www.zatrolene-hry.cz/spolecenska-hra/carcassonne-8/).
-Hra bude pro dva hráče, možná bude možnost hrát i proti počítači.
+Hra bude pro dva hráče.
 
 ## Figma design
 
 https://www.figma.com/file/5vMA4hZmWaYrlaBD8ajpZP/Untitled?type=design&node-id=0-1&mode=design&t=TYaw6hWEpXABnzl1-0
-
-### Z čeho čerpat
-
-- interaktivní hra (předělávka "deskovky")
-- mohlo by být použitelné jako solitaire
-- nebo "AI" protihráč
-- inspirovat se můžete na [zatrolených hrách](https://www.zatrolene-hry.cz/katalog-her/?fType=cat&keyword=&theme=-1&category=-1&minlength=-1&maxlength=-1&localization=6%2C+7%2C+8&min_players=1&max_players=1&age=-1)...
-- karetní hry méně typické - např. [Kabo](https://www.zatrolene-hry.cz/spolecenska-hra/kabo-8341/)
-- učitelem oblíbená [Cartagena](https://www.zatrolene-hry.cz/spolecenska-hra/cartagena-422/) stále čeká na remake
 
 ### Techniky
 
