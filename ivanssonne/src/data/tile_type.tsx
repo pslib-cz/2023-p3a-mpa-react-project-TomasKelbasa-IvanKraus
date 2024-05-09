@@ -535,6 +535,7 @@ export const tileTypes: TileType[] = [
 ]
 
 export const tilePayload = [
+    /*
     { letter: "A", value: 2 },
     { letter: "B", value: 4 },
     { letter: "C", value: 1 },
@@ -556,7 +557,7 @@ export const tilePayload = [
     { letter: "S", value: 2 },
     { letter: "T", value: 1 },
     { letter: "U", value: 8 },
-    { letter: "V", value: 9 },
+    { letter: "V", value: 9 },*/
     { letter: "W", value: 4 },
     { letter: "X", value: 1 }
 ];

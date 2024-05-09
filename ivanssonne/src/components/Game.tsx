@@ -1,6 +1,6 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import Board from './Board';
-import { GameActionTypes, GameContext, getInfoOfRoadOrTown, StructureInfoType, determineScoringPlayers, GameContextType } from '../providers/GameProvider';
+import { GameContext, PieceSidePair, GameState, GameAction } from '../providers/GameProvider';
 import Piece from './Piece';
 import styles from './styles/Game.module.scss';
 import star from '../assets/star-icon.svg';
@@ -8,78 +8,151 @@ import home from '../assets/home-icon.svg';
 import { useNavigate } from 'react-router-dom';
 import { meeples } from '../assets/meeples.tsx';
 import { MeepleColors } from '../providers/SettingsProvider.tsx';
+import { determineScoringPlayers, getInfoOfField, getInfoOfRoadOrTown, onlyUnique, endOfTurn, GameActionTypes } from '../providers/utilities.tsx';
 
 interface GameProps {}
 
-function onlyUnique(value:any, index:number, array:any[]) {
-    if(value === null || value === undefined) return false;
-    return array.indexOf(value) === index;
-}
+const finalScoring = (state: GameState, dispatch: React.Dispatch<GameAction>): void => {
 
-export const endOfTurn = (gameContext: GameContextType) => {
-    
-    const currentlyPlacedPiece = gameContext.state.placedPieces.find(p => p.id === gameContext.state.currentlyPlacedPieceId);
-    const meepleIdsToRemove: string[] = [];
+    const copy = {...state};
+    const evaluatedMeeplesIds: string[] = [];
+    const fieldMeeplesIds: string[] = [];
+    state.meeples.forEach(meeple => {
 
-    if(!currentlyPlacedPiece) console.error("Ivan je ivan")
-        // monestaries
-    const monasteries = gameContext.state.meeples.filter(m => m.positionInPiece[0] === 5);
-    for(let q = 0; q < monasteries.length; q++){
-        let monastery = monasteries[q];
-        let closed = true;
-        for(let m = -1; m <= 1; m++){
-            for(let n = -1; n <= 1; n++){
-                if(gameContext.state.placedPieces.find(p => p.positionX === monastery.positionX + m && p.positionY === monastery.positionY + n) === undefined)closed = false;
+        // skip if meeple has already been evaluated
+        if(evaluatedMeeplesIds.find(id => id === meeple.id) !== undefined) return;
+
+        const piece = state.placedPieces.find(p => p.positionX === meeple.positionX && p.positionY === meeple.positionY);
+        // monastery
+        if(piece?.tile.monastery && meeple.positionInPiece.length === 1 && meeple.positionInPiece[0] === 5){
+            let score = 0;
+            for(let m = -1; m <= 1; m++){
+                for(let n = -1; n <= 1; n++){
+                    if(state.placedPieces.find(p => p.positionX === piece.positionX + m && p.positionY === piece.positionY + n) !== undefined) score++;
+                }
+            }
+            copy.players.map(p => {
+                if(p.id === meeple.playerId){
+                    dispatch({type: GameActionTypes.REWARD_PLAYER, playerId: p.id, score: score, message: ` získal ${score} bodů za nedokončený klášter.`})
+                }
+                return p;
+            });
+        }
+        // fields for later
+        else if (meeple.positionInPiece.length === 2){
+            fieldMeeplesIds.push(meeple.id);
+            return;
+        }
+        else{
+            // roads
+            if(piece?.tile.roads.find(r => r.sides.find(s => s === meeple.positionInPiece[0]) !== undefined) !== undefined){
+                const info = getInfoOfRoadOrTown(piece, meeple.positionInPiece, state, "R");
+                const scoringPlayers = determineScoringPlayers(info.meeples);
+
+                const score = info.sides.map(a => `${a.pieceXpos}, ${a.pieceYpos}`).filter(onlyUnique).length;
+
+                // rewards players
+                scoringPlayers.forEach(sp => {
+                    copy.players.map(p => {
+                        if(p.id === sp){
+                            dispatch({type: GameActionTypes.REWARD_PLAYER, playerId: p.id, score: score, message: ` získal ${score} bodů za nedokončenou cestu.`})
+                        }
+                        return p;
+                    });
+                });
+                
+            }
+            // towns
+            else if(piece?.tile.towns.find(t => t.sides.find(s => s === meeple.positionInPiece[0]) !== undefined) !== undefined){
+                const info = getInfoOfRoadOrTown(piece, meeple.positionInPiece, state, "T");
+                const scoringPlayers = determineScoringPlayers(info.meeples);
+
+                // 1 point for each piece of the town
+                let score = info.sides.map(a => `${a.pieceXpos}, ${a.pieceYpos}`).filter(onlyUnique).length;
+
+                const bonusPiecesIds: string[] = [];
+
+                // searches for towns with erb (bonus) and adds the piece id to the bonusPiecesIds array
+                info.sides.forEach(s => {
+                    const p = state.placedPieces.find(p => p.positionX === s.pieceXpos && p.positionY === s.pieceYpos);
+                    if(p?.tile.towns.find(t => t.sides.find(side => side === s.side[0]) !== undefined)?.bonus){
+                        bonusPiecesIds.push(p.id);
+                    }
+                });
+
+                // 1 extra point for each erb in the town
+                score += bonusPiecesIds.filter(onlyUnique).length;
+
+                // rewards players
+                scoringPlayers.forEach(sp => {
+                    copy.players.map(p => {
+                        if(p.id === sp){
+                            dispatch({type: GameActionTypes.REWARD_PLAYER, playerId: p.id, score: score, message: ` získal ${score} bodů za nedokončené město.`})
+                        }
+                        return p;
+                    });
+                });
             }
         }
-        if(closed){
-            meepleIdsToRemove.push(monastery.id);
-            gameContext.dispatch({type: GameActionTypes.REWARD_PLAYER, playerId: monastery.playerId, score: 9});
-        }
-    }    
 
-    // roads
-    const closedRoads: StructureInfoType[] = currentlyPlacedPiece?.tile.roads.map(r => getInfoOfRoadOrTown(currentlyPlacedPiece, [r.sides[0]], gameContext.state, "R")).filter(infor => infor !== undefined && infor.closed) ?? [];
-    for(let i = 0; i < closedRoads.length; i++){
-        let road = closedRoads[i];
-        if(road.meeples.length === 0) continue
-        let scoringPlayers = determineScoringPlayers(road.meeples);
-
-        // special validation for one road including multiple roads from this piece
-        if(meepleIdsToRemove.find(m => road.meeples.find(r => r.id === m) !== undefined) !== undefined) continue;
-        meepleIdsToRemove.push(...road.meeples.map(m => m.id));
-        const roadScore = road.sides.map(s => gameContext.state.placedPieces.find(p => p.positionX === s.pieceXpos && p.positionY === s.pieceYpos)?.id).filter(onlyUnique).length;
-
-        for(let e = 0; e < scoringPlayers.length; e++){
-            gameContext.dispatch({type: GameActionTypes.REWARD_PLAYER, playerId: scoringPlayers[e], score: roadScore});
-        }
-    }
-
-    // towns
-    const closedTowns: StructureInfoType[] = currentlyPlacedPiece?.tile.towns.map(t => getInfoOfRoadOrTown(currentlyPlacedPiece, [t.sides[0]], gameContext.state, "T")).filter(info => info.closed) ?? [];
-    for(let j = 0; j < closedTowns.length; j++){
-        let town = closedTowns[j];
-        if(town.meeples.length === 0) continue;
-        let scoringPlayers = determineScoringPlayers(town.meeples);
-        // special validation for one town including multiple towns from this piece
-        if(meepleIdsToRemove.find(m => town.meeples.find(r => r.id === m) !== undefined) !== undefined) continue;
-        meepleIdsToRemove.push(...town.meeples.map(m => m.id));
-        const townPieces = town.sides.map(s => gameContext.state.placedPieces.find(p => p.positionX === s.pieceXpos && p.positionY === s.pieceYpos)?.id).filter(onlyUnique);
-        let townScore = townPieces.length;
-        townScore += townPieces.filter(p => gameContext.state.placedPieces.find(h => h.id === p)?.tile.towns[0].bonus).length;
-        if(townScore === 2) townScore = 1;
-        townScore *= 2;
-
-        for(let k = 0; k < scoringPlayers.length; k++){
-            gameContext.dispatch({type: GameActionTypes.REWARD_PLAYER, playerId: scoringPlayers[k], score: townScore});
-        }
-    }
-    
-    meepleIdsToRemove.forEach(meepleId => {
-        gameContext.dispatch({type: GameActionTypes.REMOVE_MEEPLE, meepleId});
     });
-    
-    gameContext.dispatch({type: GameActionTypes.END_TURN});
+
+
+    const solvedFieldMeepleIds: string[] = [];
+
+    fieldMeeplesIds.forEach(meepleId => {
+        // skip if meeple has already been evaluated
+        if(solvedFieldMeepleIds.find(id => id === meepleId) !== undefined) return;
+
+        const meeple = state.meeples.find(m => m.id === meepleId);
+        const piece = state.placedPieces.find(p => p.positionX === meeple?.positionX && p.positionY === meeple?.positionY);
+        if(!piece) return;
+        if(!meeple) return;
+
+        const info = getInfoOfField(piece.id, meeple.positionInPiece, state);
+        console.log(info);
+        // adds all meeples on the field to the solvedFieldMeepleIds array
+        solvedFieldMeepleIds.push(...info.meeples.map(m => m.id));
+
+        // determines the scoring players based on number of meeples on the field
+        const scoringPlayers = determineScoringPlayers(info.meeples);
+
+        const calculatedTownSides: PieceSidePair[] = [];
+
+        let score = 0;
+
+        info.sides.forEach(s => {
+            const p = state.placedPieces.find(p => p.positionX === s.pieceXpos && p.positionY === s.pieceYpos);
+            const newSide = (s.side[0] + (s.side[1] === 2 ? 1 : -1) - 1) % 4 + 1;
+
+            // checks if the side has already been calculated - if so, then there is no need to calculate it again (it would lead to double or more points for the same town)
+            if(calculatedTownSides.find(c => c.pieceXpos === s.pieceXpos && c.pieceYpos === s.pieceYpos
+                && c.side.find(a => a === newSide) !== undefined) !== undefined) return;
+
+            // checks if there is a town on newSide
+            if(p?.tile.towns.find(t => t.sides.find(side => side === newSide) !== undefined) !== undefined){
+
+                const tonwInfo = getInfoOfRoadOrTown(p, [newSide], state, "T");
+                calculatedTownSides.push(...tonwInfo.sides);
+
+                if(!tonwInfo.closed) return;
+                else score += 1;
+            }
+        });
+
+        // 3 points for each closed town
+        score *= 3;
+
+        // rewards players
+        scoringPlayers.forEach(sp => {
+            copy.players.map(p => {
+                if(p.id === sp){
+                    dispatch({type: GameActionTypes.REWARD_PLAYER, playerId: p.id, score: score, message: ` získal ${score} bodů za nedokončené pole.`})
+                }
+                return p;
+            });
+        });
+    });
 }
 
 const Game: React.FC<GameProps> = () => {
@@ -99,20 +172,14 @@ const Game: React.FC<GameProps> = () => {
     };
 
     const handleEndGame = () => {
+        finalScoring(gameContext.state, gameContext.dispatch);
         gameContext.dispatch({type: GameActionTypes.END_GAME});
     };
 
     useEffect(() => {
         gameContext.dispatch({type: GameActionTypes.RESET_GAME});
     }, []);
-    /*
-    const sortedPlayers = () => {
-        const { players, currentPlayerId } = gameContext.state;
-        return [
-            ...players.filter(p => p.id === currentPlayerId),
-            ...players.filter(p => p.id !== currentPlayerId)
-        ];
-    };*/
+
     const navigate = useNavigate();
 
     const handleGoHome = () => {
@@ -144,6 +211,18 @@ const Game: React.FC<GameProps> = () => {
         }
         return meeplePath;
     }
+    const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        if (endOfMessagesRef.current) {
+            endOfMessagesRef.current.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
+        }
+    }, [gameContext.state.messageLog]); 
+    
+
+    const toggleLogger = () => {
+        setLoggerOpen(!isLoggerOpen);
+    };
 
 
     const players = gameContext.state.players;
@@ -164,7 +243,7 @@ const Game: React.FC<GameProps> = () => {
                         ) : (
                             gameContext.state.players.map((player, index) => (
                                 <div className={styles["overlay__content"]} key={index}>
-                                    {index === 0 ? (
+                                    {player.score === Math.max(...gameContext.state.players.map(p => p.score)) ? (
                                         <p className={styles["content__player"]}>Vítěz: {player.name}</p>
                                     ) : (
                                         <p className={styles["content__player"]}>Prohra: {player.name}</p>
@@ -238,6 +317,16 @@ const Game: React.FC<GameProps> = () => {
                     </div>
                 }
             </aside>
+      
+            <div className={styles["aside__logger"]} style={{ border: `3px solid ${currentPlayerColor}` }}>
+                <ul>
+                    {gameContext.state.messageLog.map((log, index) => (
+                        <li key={index} dangerouslySetInnerHTML={{__html: log}}></li>
+                    ))}
+                    <div ref={endOfMessagesRef} /> 
+                </ul>
+            </div>
+
         </div>
     );
 };

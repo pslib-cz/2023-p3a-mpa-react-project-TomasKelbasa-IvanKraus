@@ -1,16 +1,13 @@
 import React, { useContext } from 'react';
 import { useDrop } from 'react-dnd';
-import { GameActionTypes, GameContext } from '../providers/GameProvider';
+import { GameContext } from '../providers/GameProvider';
 import styles from './styles/EmptyPiece.module.scss';
+import { DndTypes, GameActionTypes } from '../providers/utilities';
 
 type EmptyPieceProps = {
     x: number;
     y: number;
 };
-
-export enum DndTypes {
-    PIECE = "piece"
-}
 
 const EmptyPiece: React.FC<EmptyPieceProps> = ({ x, y }) => {
     const { state, dispatch } = useContext(GameContext);

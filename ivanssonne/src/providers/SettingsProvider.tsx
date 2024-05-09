@@ -47,7 +47,7 @@ const initialSettingsReducerState: SettingsType = {
     typeOfGame: TypeOfGame.PVP
 }
 
-export const settingsReducer = (state: SettingsType, action: SettingsAction) => {
+const settingsReducer = (state: SettingsType, action: SettingsAction) => {
     if(action.payload === null || (action.payload as string).length <= 0) return state;
     switch(action.type){
         case SettingsActionTypes.SET_FIRST_NAME:  

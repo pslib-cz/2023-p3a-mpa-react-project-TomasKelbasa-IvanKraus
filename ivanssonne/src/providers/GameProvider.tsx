@@ -1,24 +1,13 @@
 import React, { createContext, PropsWithChildren, Reducer, useContext, useReducer } from 'react';
 import { PieceType } from '../components/Piece';
 import { Stack } from 'stack-typescript';
-import { RoadType, tilePayload, TileType, tileTypes, TownType } from '../../data/tile_type';
+import { tilePayload, TileType, tileTypes } from '../data/tile_type';
 import { v4 as uuidv4 } from 'uuid';
 import { SettingsContext, TypeOfGame, MeepleColors } from './SettingsProvider';
+import { GameActionTypes } from './utilities';
 
 
 const firstPiecePosition = [25, 25];
-
-export enum GameActionTypes {
-    RESET_GAME,
-    PLACE_PIECE,
-    PLACE_MEEPLE,
-    END_TURN,
-    GET_NEW_PIECE,
-    ROTATE_CURRENT_PIECE,
-    REWARD_PLAYER,
-    REMOVE_MEEPLE,
-    END_GAME
-}
 
 export type PlayerType = {
     id: string,
@@ -33,8 +22,7 @@ export type MeepleType = {
     playerId: string,
     positionX: number,
     positionY: number,
-    positionInPiece: number[],
-    state: any
+    positionInPiece: number[]
 }
 
 export type GameState = {
@@ -48,7 +36,8 @@ export type GameState = {
     currentPlayerId: string,
     possiblePiecePlacements: number[][],
     gameEnded: boolean,
-    showResult: boolean
+    showResult: boolean,
+    messageLog: string[]
 }
 
 export type GameAction = {
@@ -70,7 +59,8 @@ export type GameAction = {
 } | {
     type: GameActionTypes.REWARD_PLAYER,
     playerId: string,
-    score: number
+    score: number,
+    message: string
 } | {
     type: GameActionTypes.REMOVE_MEEPLE,
     meepleId: string
@@ -91,7 +81,7 @@ const rotatePiece = (piece: PieceType, rotation: number): PieceType => {
             fields: piece.tile.fields.map(field => {
                 return ({
                     sides: field.sides.map(f => {
-                        let t = [...f];
+                        const t = [...f];
                         t[0] = (t[0] + rotation - 1) % 4 + 1;
                         return t;
                     })
@@ -176,7 +166,8 @@ const initialGameReducerState: GameState = {
     unplacedPieces: new Stack<PieceType>(),
     currentPlayerId: '',
     gameEnded: false,
-    showResult: false
+    showResult: false,
+    messageLog: ["Hra začala!"]
 }
 
 export type GameContextType = {
@@ -206,8 +197,8 @@ const GameProvider: React.FC<PropsWithChildren> = ({children}) => {
                     possiblePiecePlacements: [],
                     placedPieces: [...state.placedPieces, {...state.currentPiece, positionX: action.locationX, positionY: action.locationY, placed: true} as PieceType]
                 }
-            case GameActionTypes.PLACE_MEEPLE:
-                let cPlayer  = state.players.find(p => p.id === state.currentPlayerId);
+            case GameActionTypes.PLACE_MEEPLE: {
+                const cPlayer  = state.players.find(p => p.id === state.currentPlayerId);
 
                 if(!cPlayer) return state;
                 if(cPlayer.numberOfMeeples <= 0) return state;
@@ -219,8 +210,7 @@ const GameProvider: React.FC<PropsWithChildren> = ({children}) => {
                     playerId: cPlayer.id,
                     positionX: cpp?.positionX as number,
                     positionY: cpp?.positionY as number,
-                    positionInPiece: action.position,
-                    state: null
+                    positionInPiece: action.position
                 }
                 return {
                     ...state,
@@ -233,8 +223,8 @@ const GameProvider: React.FC<PropsWithChildren> = ({children}) => {
                         }
                     })]
                 }
-
-            case GameActionTypes.ROTATE_CURRENT_PIECE:
+            }
+            case GameActionTypes.ROTATE_CURRENT_PIECE: {
                 if(state.currentPiece === null) return state;
                 const rotatedPiece = rotatePiece(state.currentPiece, action.direction === 'left' ? 3 : 1);
                 return {
@@ -242,25 +232,26 @@ const GameProvider: React.FC<PropsWithChildren> = ({children}) => {
                     currentPiece: rotatedPiece,
                     possiblePiecePlacements: calculatePossiblePlacements(state, rotatedPiece)
                 }
-            case GameActionTypes.REMOVE_MEEPLE:
-            const meepleToRemove = state.meeples.find(m => m.id === action.meepleId);
-            if(!meepleToRemove) return state;
-            const playerToRemoveMeeple = state.players.find(p => p.id === meepleToRemove.playerId);
-            if(!playerToRemoveMeeple) return state;
-
-            return {
-                ...state,
-                meeples: state.meeples.filter(m => m.id !== action.meepleId),
-                players: state.players.map(p => {
-                    if(p.id === playerToRemoveMeeple.id){
-                        return {...p, numberOfMeeples: p.numberOfMeeples + 1};
-                    }else{
-                        return p;
-                    }
-                })
             }
+            case GameActionTypes.REMOVE_MEEPLE: {
+                const meepleToRemove = state.meeples.find(m => m.id === action.meepleId);
+                if(!meepleToRemove) return state;
+                const playerToRemoveMeeple = state.players.find(p => p.id === meepleToRemove.playerId);
+                if(!playerToRemoveMeeple) return state;
 
-            case GameActionTypes.REWARD_PLAYER:
+                return {
+                    ...state,
+                    meeples: state.meeples.filter(m => m.id !== action.meepleId),
+                    players: state.players.map(p => {
+                        if(p.id === playerToRemoveMeeple.id){
+                            return {...p, numberOfMeeples: p.numberOfMeeples + 1};
+                        }else{
+                            return p;
+                        }
+                    })
+                }
+            }
+            case GameActionTypes.REWARD_PLAYER: {
                 const player = state.players.find(p => p.id === action.playerId);
                 if(!player) return state;
                 return {
@@ -271,10 +262,12 @@ const GameProvider: React.FC<PropsWithChildren> = ({children}) => {
                         }else{
                             return p;
                         }
-                    })
+                    }),
+                    messageLog: [...state.messageLog,  `<span class="player-color" style="color: ${player.meepleColor}">${player.name}</span>${action.message}`]
+
                 }
-            
-            case GameActionTypes.END_TURN:
+            }
+            case GameActionTypes.END_TURN: {
 
                 if(state.unplacedPieces.length <= 0){
 
@@ -324,8 +317,8 @@ const GameProvider: React.FC<PropsWithChildren> = ({children}) => {
                     unplacedPieces: stackDupe,
                     possiblePiecePlacements: possiblePlacements
                 }
-
-            case GameActionTypes.GET_NEW_PIECE:
+            }
+            case GameActionTypes.GET_NEW_PIECE: {
                 if(!state.currentPieceImpossibleToPlace) return state;
                 const stackCopy = new Stack<PieceType>(...state.unplacedPieces);
 
@@ -372,8 +365,8 @@ const GameProvider: React.FC<PropsWithChildren> = ({children}) => {
                     currentPieceImpossibleToPlace: false
                 }
 
-            
-            case GameActionTypes.RESET_GAME:
+            }
+            case GameActionTypes.RESET_GAME: {
                 const arr: PieceType[] = [];
                 tilePayload.forEach(tile => {
                     for(let i = 0; i < tile.value; i++) {
@@ -393,7 +386,7 @@ const GameProvider: React.FC<PropsWithChildren> = ({children}) => {
                 const stack = new Stack<PieceType>(...arr);
                 const currentPiece = stack.pop();
                 
-                let players: PlayerType[] = []
+                const players: PlayerType[] = []
 
                 if(settingsContext.state.typeOfGame === TypeOfGame.PVP){
                     players.push({id: uuidv4(), name: settingsContext.state.firstName, score: 0, meepleColor: settingsContext.state.firstColor, numberOfMeeples: 8})
@@ -411,8 +404,9 @@ const GameProvider: React.FC<PropsWithChildren> = ({children}) => {
                     possiblePiecePlacements: [[...firstPiecePosition]],
                     players: players
                 };
+            }
             case GameActionTypes.END_GAME:
-                return finalScoring(state);
+                return {...state, showResult: true, meeples: []}
 
             default:
                 return state;
@@ -483,365 +477,4 @@ export type StructureInfoType = {
     meeples: MeepleType[],
     closed: boolean,
     sides: PieceSidePair[]
-}
-
-// getInfoOfRoadOrTown returns information about the road or town that the side is a part of
-// type = "R" for road, "T" for town
-// side = side of the piece that is being checked in format [n] where n is the side number, side.length must be 1
-// visitedSides = array of objects that contain information about the visited sides of the pieces, used for recursion
-export const getInfoOfRoadOrTown = (piece: PieceType, side: number[], state: GameState, type: "R" | "T", visitedSides: PieceSidePair[] = []): StructureInfoType => {
-
-    if(type !== "R" && type !== "T") throw new Error("Invalid type");
-    let structure: RoadType | TownType | undefined;
-    if(type === "R"){
-        structure = piece.tile.roads.find(r => r.sides.find(s => s === side[0]) !== undefined);
-    }else{
-        structure = piece.tile.towns.find(t => t.sides.find(s => s === side[0]) !== undefined);
-    }
-    
-    if(!structure) throw new Error("Invalid side");
-
-    let answer: MeepleType[] = [];
-    let closed = true;
-    structure.sides.forEach(s => {
-        if(visitedSides.find(v => v.pieceXpos === piece.positionX && v.pieceYpos === piece.positionY && v.side.find(a => a === s) !== undefined) !== undefined) {}
-        else{
-            const meeple = state.meeples.find(m => m.positionX === piece.positionX && m.positionY === piece.positionY && m.positionInPiece.length === 1 && m.positionInPiece[0] === s)
-            if(meeple !== undefined){
-                answer.push(meeple);
-            }
-            let nextPieceCoords: number[] = [];
-            let nextSide: number[] = [];
-            switch(s){
-                case 1:
-                    nextPieceCoords = [piece.positionX, piece.positionY + 1];
-                    nextSide = [3];
-                    break;
-                case 2:
-                    nextPieceCoords = [piece.positionX - 1, piece.positionY];
-                    nextSide = [4];
-                    break;
-                case 3:
-                    nextPieceCoords = [piece.positionX, piece.positionY - 1];
-                    nextSide = [1];
-                    break;
-                case 4:
-                    nextPieceCoords = [piece.positionX + 1, piece.positionY];
-                    nextSide = [2];
-                    break;
-                default:
-                    throw new Error("Invalid side");
-            }
-            const nextPiece = state.placedPieces.find(p => p.positionX === nextPieceCoords[0] && p.positionY === nextPieceCoords[1]);
-            visitedSides.push({pieceXpos: piece.positionX, pieceYpos: piece.positionY, side: [s]});
-            if(nextPiece){
-                const recursionResult = getInfoOfRoadOrTown(nextPiece, nextSide, state,type, visitedSides);
-                answer.push(...recursionResult.meeples);
-                closed = closed && recursionResult.closed;
-            }else{
-                closed = false;
-            }
-        }
-    });
-    return {
-        type: type,
-        meeples: answer,
-        closed: closed,
-        sides: visitedSides
-    };
-}
-
-export const isFieldEmpty = (piece: PieceType, side: number[], state: GameState, visitedSides: PieceSidePair[] = []): boolean => {
-
-    if(side.length !== 2) throw new Error("Invalid side");
-    let field = piece.tile.fields.find(f => f.sides.find(s => s[0] === side[0] && s[1] == side[1]) !== undefined);
-    if(!field) throw new Error("Invalid side");
-
-    for(let i = 0; i < field.sides.length; i++){
-        let s = field.sides[i];
-        if(visitedSides.find(v => v.pieceXpos === piece.positionX && v.pieceYpos === piece.positionY && v.side[0] === s[0] && v.side[1] === s[1]) !== undefined) {}
-        else{
-            if(state.meeples.find(m => m.positionX === piece.positionX && m.positionY === piece.positionY && m.positionInPiece.length === 2 && m.positionInPiece[0] === s[0] && m.positionInPiece[1] === s[1]) !== undefined){
-                return false;
-            }
-            let nextPieceCoords: number[] = [];
-            let nextSide: number[] = [];
-            switch(s[0]){
-                case 1:
-                    nextPieceCoords = [piece.positionX, piece.positionY + 1];
-                    nextSide = [3];
-                    break;
-                case 2:
-                    nextPieceCoords = [piece.positionX - 1, piece.positionY];
-                    nextSide = [4];
-                    break;
-                case 3:
-                    nextPieceCoords = [piece.positionX, piece.positionY - 1];
-                    nextSide = [1];
-                    break;
-                case 4:
-                    nextPieceCoords = [piece.positionX + 1, piece.positionY];
-                    nextSide = [2];
-                    break;
-                default:
-                    throw new Error("Invalid side");
-            }
-            nextSide.push(s[1]%2 + 1);
-            const nextPiece = state.placedPieces.find(p => p.positionX === nextPieceCoords[0] && p.positionY === nextPieceCoords[1]);
-            visitedSides.push({pieceXpos: piece.positionX, pieceYpos: piece.positionY, side: s});
-            if(nextPiece){
-                if(!isFieldEmpty(nextPiece, nextSide, state, visitedSides)){
-                    return false;
-                }
-            }
-        }
-    };
-    return true;
-
-}
-
-type DictionaryPair = {
-    key: string,
-    value: number
-}
-
-export const determineScoringPlayers = (meeples: MeepleType[]): string[] => {
-
-    if(meeples.length === 1) return [meeples[0].playerId];
-
-    const playerIds = meeples.map(m => m.playerId);
-    let d: DictionaryPair[] = [];
-
-    let max = 1;
-
-    playerIds.forEach((id) => {
-        const index = d.findIndex(p => p.key === id);
-        if(index !== -1){
-            d[index].value = d[index].value + 1;
-            max = Math.max(max, d[index].value);
-        }else{
-            d.push({key: id, value: 1});
-        }
-    });
-
-    return d.filter(p => p.value === max).map(a => a.key);
-}
-
-const finalScoring = (state: GameState): GameState => {
-
-    let copy = {...state};
-    const evaluatedMeeplesIds: string[] = [];
-    const fieldMeeplesIds: string[] = [];
-    state.meeples.forEach(meeple => {
-
-        // skip if meeple has already been evaluated
-        if(evaluatedMeeplesIds.find(id => id === meeple.id) !== undefined) return;
-
-        const piece = state.placedPieces.find(p => p.positionX === meeple.positionX && p.positionY === meeple.positionY);
-        // monastery
-        if(piece?.tile.monastery && meeple.positionInPiece.length === 1 && meeple.positionInPiece[0] === 5){
-            let score = 0;
-            for(let m = -1; m <= 1; m++){
-                for(let n = -1; n <= 1; n++){
-                    if(state.placedPieces.find(p => p.positionX === piece.positionX + m && p.positionY === piece.positionY + n) !== undefined) score++;
-                }
-            }
-            copy.players = copy.players.map(p => {
-                if(p.id === meeple.playerId){
-                    return {...p, score: p.score + score};
-                }
-                return p;
-            });
-        }
-        // fields for later
-        else if (meeple.positionInPiece.length === 2){
-            fieldMeeplesIds.push(meeple.id);
-            return;
-        }
-        else{
-            if(piece?.tile.roads.find(r => r.sides.find(s => s === meeple.positionInPiece[0]) !== undefined) !== undefined){
-                const info = getInfoOfRoadOrTown(piece, meeple.positionInPiece, state, "R");
-                const scoringPlayers = determineScoringPlayers(info.meeples);
-
-                const score = info.sides.map(a => `${a.pieceXpos}, ${a.pieceYpos}`).filter(onlyUnique).length;
-
-                // rewards players
-                scoringPlayers.forEach(sp => {
-                    copy.players = copy.players.map(p => {
-                        if(p.id === sp){
-                            return {...p, score: p.score + score};
-                        }
-                        return p;
-                    });
-                });
-                
-            }
-            else if(piece?.tile.towns.find(t => t.sides.find(s => s === meeple.positionInPiece[0]) !== undefined) !== undefined){
-                const info = getInfoOfRoadOrTown(piece, meeple.positionInPiece, state, "T");
-                const scoringPlayers = determineScoringPlayers(info.meeples);
-
-                // 1 point for each piece of the town
-                let score = info.sides.map(a => `${a.pieceXpos}, ${a.pieceYpos}`).filter(onlyUnique).length;
-
-                const bonusPiecesIds: string[] = [];
-
-                // searches for towns with erb (bonus) and adds the piece id to the bonusPiecesIds array
-                info.sides.forEach(s => {
-                    const p = state.placedPieces.find(p => p.positionX === s.pieceXpos && p.positionY === s.pieceYpos);
-                    if(p?.tile.towns.find(t => t.sides.find(side => side === s.side[0]) !== undefined)?.bonus){
-                        bonusPiecesIds.push(p.id);
-                    }
-                });
-
-                // 1 extra point for each erb in the town
-                score += bonusPiecesIds.filter(onlyUnique).length;
-
-                // rewards players
-                scoringPlayers.forEach(sp => {
-                    copy.players = copy.players.map(p => {
-                        if(p.id === sp){
-                            return {...p, score: p.score + score};
-                        }
-                        return p;
-                    });
-                });
-            }
-        }
-
-    });
-
-    const solvedFieldMeepleIds: string[] = [];
-
-    fieldMeeplesIds.forEach(meepleId => {
-        // skip if meeple has already been evaluated
-        if(solvedFieldMeepleIds.find(id => id === meepleId) !== undefined) return;
-
-        const meeple = state.meeples.find(m => m.id === meepleId);
-        const piece = state.placedPieces.find(p => p.positionX === meeple?.positionX && p.positionY === meeple?.positionY);
-        if(!piece) return;
-        if(!meeple) return;
-
-        const info = getInfoOfField(piece.id, meeple.positionInPiece, state);
-        console.log(info);
-        // adds all meeples on the field to the solvedFieldMeepleIds array
-        solvedFieldMeepleIds.push(...info.meeples.map(m => m.id));
-
-        // determines the scoring players based on number of meeples on the field
-        const scoringPlayers = determineScoringPlayers(info.meeples);
-
-        const calculatedTownSides: PieceSidePair[] = [];
-
-        let score = 0;
-
-        info.sides.forEach(s => {
-            const p = state.placedPieces.find(p => p.positionX === s.pieceXpos && p.positionY === s.pieceYpos);
-            const newSide = (s.side[0] + (s.side[1] === 2 ? 1 : -1) - 1) % 4 + 1;
-
-            // checks if the side has already been calculated - if so, then there is no need to calculate it again (it would lead to double or more points for the same town)
-            if(calculatedTownSides.find(c => c.pieceXpos === s.pieceXpos && c.pieceYpos === s.pieceYpos
-                && c.side.find(a => a === newSide) !== undefined) !== undefined) return;
-
-            // checks if there is a town on newSide
-            if(p?.tile.towns.find(t => t.sides.find(side => side === newSide) !== undefined) !== undefined){
-
-                const tonwInfo = getInfoOfRoadOrTown(p, [newSide], state, "T");
-                calculatedTownSides.push(...tonwInfo.sides);
-
-                if(!tonwInfo.closed) return;
-                else score += 1;
-            }
-        });
-
-        // 3 points for each closed town
-        score *= 3;
-
-        // rewards players
-        scoringPlayers.forEach(sp => {
-            copy.players = copy.players.map(p => {
-                if(p.id === sp){
-                    return {...p, score: p.score + score};
-                }
-                return p;
-            });
-        });
-    });
-
-    return {...copy, meeples: [], showResult: true};
-}
-
-function onlyUnique(value:any, index:number, array:any[]) {
-    if(value === null || value === undefined) return false;
-    return array.indexOf(value) === index;
-}
-
-type FieldInfoType = {
-    meeples: MeepleType[],
-    sides: PieceSidePair[]
-}
-
-// uses recursion
-// gets all sides of the field and all meeples on the field
-const getInfoOfField = (pieceId: string, side: number[], state: GameState, visitedSides: PieceSidePair[] = []): FieldInfoType => {
-
-    const piece = state.placedPieces.find(p => p.id === pieceId);
-    if(!piece) throw new Error("Invalid piece id");
-
-    let field = piece.tile.fields.find(f => f.sides.find(s => s[0] === side[0] && s[1] == side[1]) !== undefined);
-
-    if(!field) throw new Error("Invalid side");
-
-    const meeples: MeepleType[] = [];
-
-    field.sides.forEach(s => {
-
-        // if side has already been visited, skip
-        if(visitedSides.find(v => v.pieceXpos === piece.positionX && v.pieceYpos === piece.positionY 
-            && v.side[0] === s[0] && v.side[1] === s[1]) !== undefined) return;
-
-        // searches for meeple on the side of piece
-        const meeple = state.meeples.find(m => m.positionX === piece.positionX && m.positionY === piece.positionY && m.positionInPiece.length === 2 && m.positionInPiece[0] === s[0] && m.positionInPiece[1] === s[1]);
-        if(meeple) meeples.push(meeple);
-
-
-        let nextPieceCoords: number[] = [];
-        let nextSide: number[] = [];
-
-        // calculates the next piece coordinates and the side of the next piece that is connected to the current piece
-        switch(s[0]){
-            case 1:
-                nextPieceCoords = [piece.positionX, piece.positionY + 1];
-                nextSide = [3];
-                break;
-            case 2:
-                nextPieceCoords = [piece.positionX - 1, piece.positionY];
-                nextSide = [4];
-                break;
-            case 3:
-                nextPieceCoords = [piece.positionX, piece.positionY - 1];
-                nextSide = [1];
-                break;
-            case 4:
-                nextPieceCoords = [piece.positionX + 1, piece.positionY];
-                nextSide = [2];
-                break;
-            default:
-                throw new Error("Invalid side");
-        }
-
-        // the nextSide has to be the opposite of the current side
-        nextSide.push(s[1]%2 + 1);
-
-        visitedSides.push({pieceXpos: piece.positionX, pieceYpos: piece.positionY, side: s});
-        const nextPiece = state.placedPieces.find(p => p.positionX === nextPieceCoords[0] && p.positionY === nextPieceCoords[1]);
-        if(nextPiece){
-            const recursionResult = getInfoOfField(nextPiece.id, nextSide, state, visitedSides);
-            meeples.push(...recursionResult.meeples);
-        }
-        
-    });
-
-    return {
-        meeples: meeples.map(m => m.id).filter(onlyUnique).map(id => state.meeples.find(m => m.id === id) as MeepleType),
-        sides: visitedSides
-    };
 }

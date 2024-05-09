@@ -1,13 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { TileType } from '../../data/tile_type';
+import { TileType } from '../data/tile_type.tsx';
 import styles from './styles/Piece.module.scss';
-import { GameContext, GameActionTypes, getInfoOfRoadOrTown, isFieldEmpty } from '../providers/GameProvider';
+import { GameContext } from '../providers/GameProvider';
 import { useDrag } from 'react-dnd';
-import { DndTypes } from './EmptyPiece';
 import MeeplePlace from './MeeplePlace';
 import Meeple from './Meeple';
-import { endOfTurn } from './Game';
 import { images } from '../images/index.tsx';
+import { getInfoOfRoadOrTown, isFieldEmpty, DndTypes, endOfTurn, GameActionTypes } from '../providers/utilities.tsx';
 
 export interface PieceProps {
     piece: PieceType;
@@ -47,15 +46,15 @@ const Piece: React.FC<PieceProps> = React.memo(({ piece }) => {
             setShouldEndTurn(false);
         }
     }, [shouldEndTurn, gameContext]);
-
+    const [,drag] = useDrag(() => ({
+        type: DndTypes.PIECE,
+        item: {piece: piece},
+    }));
 
     // if the piece is the current piece, we want to be able to drag it
     if(gameContext && gameContext.state.currentPiece && gameContext.state.currentPiece.id === piece.id){
 
-        const [,drag] = useDrag(() => ({
-            type: DndTypes.PIECE,
-            item: {piece: piece},
-        }));
+        
         return (
             <div ref={drag} className={styles["piece"]} style={{}}>
                 <img
