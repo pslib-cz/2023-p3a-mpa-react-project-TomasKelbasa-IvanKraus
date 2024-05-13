@@ -220,10 +220,6 @@ const Game: React.FC<GameProps> = () => {
     }, [gameContext.state.messageLog]); 
     
 
-    const toggleLogger = () => {
-        setLoggerOpen(!isLoggerOpen);
-    };
-
 
     const players = gameContext.state.players;
     const firstPlayerColor = players.length > 0 ? players[0].meepleColor : 'transparent';
