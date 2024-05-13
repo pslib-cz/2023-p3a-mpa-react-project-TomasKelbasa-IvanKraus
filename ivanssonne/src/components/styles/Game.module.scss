@@ -1,0 +1,408 @@
+$beige-color: #F0D9B5;
+$brown-color: #B58863;
+$gold-color: #EBC600;
+$yellow-color: #FFE500;
+$black-color: #000000;
+$green-color: #00FF38;
+$blue-color: #0038FF;
+$red-color: #FF0000;
+
+
+body {
+    overflow: hidden;
+}
+/* Stylování celého scroll baru */
+::-webkit-scrollbar {
+    width: 24px; /* šířka vertikálního scroll baru */
+    height: 24px; /* výška horizontálního scroll baru */
+}
+
+/* Stylování dráhy (track) scroll baru */
+::-webkit-scrollbar-track {
+    background: #252525; /* barva pozadí dráhy */
+}
+
+/* Stylování posuvníku (thumb) */
+::-webkit-scrollbar-thumb {
+    background-color: $gold-color; /* barva posuvníku */
+    border-radius: 16px; /* zaoblení rohů posuvníku */
+    border: 8px solid #252525; /* okraj posuvníku */
+    transition: all 0.2 ease; /* plynulý přechod při změně barvy */
+}
+
+/* Stylování posuvníku při najetí myši */
+::-webkit-scrollbar-thumb:hover {
+    background-color: #d6b601; /* tmavší barva při najetí myši */
+    cursor: pointer; 
+}
+::-webkit-scrollbar-corner {
+    background-color: $gold-color; /* Změňte barvu podle potřeby */
+}
+
+
+
+.game{
+    display: flex;
+    align-items: start;
+    height: 100vh;
+    position: relative;
+    .button_home {
+        position: absolute;
+        width: 5rem;
+        height: 5rem;
+        border-radius: 0 0 1rem 0;
+        box-shadow: 0 0 10px black;
+        background: linear-gradient(to left, #1E2021, #323436);
+        left: 0;
+        border: none;
+        transition: all 0.3s ease;
+        top: 0;
+        z-index: 100;
+        &:hover {
+            cursor: pointer;
+            box-shadow: 0 0 10px $gold-color;
+
+        }
+    }
+
+    .game__win_overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 100;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        color: white;
+        font-size: 3rem;
+        font-family: 'Lindsay', sans-serif;
+
+        .win_overlay {
+            background: linear-gradient(to left, #1E2021, #323436);
+            padding: 4rem;
+            border-radius: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 10px $gold-color;
+            .content__player {
+                color: $beige-color;
+                font-size: 2.5rem;
+            }
+            .content__score {
+                color: $gold-color;
+            }
+            h2 {
+                font-size: 3rem;
+                margin: 0;
+                color: $gold-color;
+                font-weight: 500;
+            }
+            p {
+                font-size: 1.5rem;
+                font-family: 'crimson-text', serif;
+                text-align: center;
+                color: $beige-color;
+                span {
+                    color: white;
+                }
+            }
+            button {
+                background-color: $gold-color;
+                border: 2px solid $gold-color;
+                color: $black-color;
+                padding: 0.5rem 1rem;
+                font-size: 1.5rem;
+                border-radius: 0.5rem;
+                margin-top: 4rem;
+                color: black;
+                font-weight: 500;
+                &:hover {
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+
+    .game__aside {
+        z-index: 30;
+        font-family: 'Lindsay', sans-serif;
+
+        .notile {
+            background-color: $beige-color;
+            width: 100px;
+            height: 100px;
+            margin-top: 0rem;
+        }
+        .aside__players {
+            position: absolute;
+            color: white;
+            background: linear-gradient(#FF0000, #0038FF); 
+            opacity: 1;
+            z-index: 2;
+            right: 2rem;
+            top: 30%;
+            transform: translateY(-50%);
+            padding: 4px;
+            border-radius: 0.5rem;
+
+
+            .content {
+                background: linear-gradient(to left, #1E2021, #323436);
+                padding: 1rem;
+                border-radius: 0.5rem;
+                width: 15rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                position: relative;
+                min-height: 25rem;
+
+                .player {
+                    font-size: 2.25rem;
+                    h3 {
+                        font-size: 3rem;
+                        text-align: center;
+                        margin: 0;
+                        color: $gold-color;
+                        font-weight: 500;
+                    }
+                    .meeple_icon {
+                        width: 3.5rem;
+                    }
+                    .star {
+                        width: 2rem;
+                    }
+                    .player__stats {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-top: -2rem;
+
+                        div {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        }
+                    }
+                }
+                .settings {
+                    position: absolute;
+                    top: 50%;
+                    right: 50%;
+                    transform: translate(50%, -50%);
+                    button {
+                        background-color: transparent;
+                        border: none;
+                        &:hover {
+                            cursor: pointer;
+                        }
+                    }
+                    .button_passturn {
+                        background-color: $gold-color;
+                        border: 2px solid $gold-color;
+                        color: $gold-color;
+                        padding: 0.5rem 1rem;
+                        font-size: 1.5rem;
+                        border-radius: 0.5rem;
+                        color: black;
+                        font-weight: 500;
+                    }
+
+                    .button_endgame {
+                        background-color: $gold-color;
+                        border: 2px solid $gold-color;
+                        color: $gold-color;
+                        padding: 0.5rem 1rem;
+                        font-size: 1.5rem;
+                        border-radius: 0.5rem;
+                        color: black;
+                        font-weight: 500;
+                    }
+                    .button_passturn--unactive {
+                        background-color: transparent;
+                        border: 2px solid $gold-color;
+                        color: $gold-color;
+                        padding: 0.5rem 1rem;
+                        font-size: 1.5rem;
+                        border-radius: 0.5rem;
+                        opacity: 0.5;
+                        pointer-events: none;
+                    }
+                    div {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        width: 15rem;
+                    }
+                    p {
+                        margin-top: 0.5rem;
+                        font-size: 1.5rem;
+                        font-family: 'crimson-text', serif;
+                        text-align: center;
+                        color: $beige-color;
+                        span {
+                            color: white;
+                        }
+                    }
+                }
+
+                .player:nth-child(2) {
+                    margin-bottom: -2rem;
+                    opacity: 0.5;
+                }
+            }
+        }
+
+        .aside__tile:has(.cant_put){
+           padding-bottom: 10rem;
+           margin-bottom: -6.5rem;
+           img {
+            opacity: 0.5;
+            pointer-events: none;
+           }
+           button.rotate {
+            opacity: 0.5;
+            pointer-events: none;
+            &::after {
+                opacity: 0.5;
+            }
+           }
+
+           .cant_put {
+            position: absolute;
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 75%;
+            text-align: center;
+            font-size: 1.35rem;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            button {
+                background-color: transparent;
+                border: 2px solid $gold-color;
+                color: $gold-color;
+                padding: 0.5rem 1rem;
+                font-size: 1.5rem;
+                border-radius: 0.5rem;
+                font-weight: 500;
+                opacity: 1;
+                transition: all 0.2s ease;
+                pointer-events: all;
+                &:hover {
+                    cursor: pointer;
+                    background-color: $gold-color;
+                    color: $black-color;
+                }
+            
+            }
+           }
+        }
+        .aside__tile {
+            position: absolute;
+            color: white;
+            background: linear-gradient(to left, #1E2021, #2c2e2f);
+            opacity: 1;
+            border: 4px solid $beige-color;
+            right: 2rem;
+            width: 15rem;
+            bottom: 25%;
+            transform: translateY(25%);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            display: flex;  
+            justify-content: space-between;
+            align-items: center;
+
+            button {
+                &:hover {
+                    cursor: pointer;
+                }
+            }
+            p.notile {
+                color: $beige-color;
+                font-size: 1.5rem;
+            }
+            button.rotate {
+                opacity: 1;
+                position: relative;
+                color: transparent;
+                background: transparent;
+                width:  100px;
+                height: 100px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border: none;
+                &:hover {
+                    cursor: pointer;
+                }
+
+                &:after {
+                    content: '';
+                    background-image: url('../../assets/rotate-icon.svg');
+                    background-size: cover;
+                    width: 50%;
+                    height: 50%;
+                    display: block;
+                    z-index: 100;
+                    position: absolute;
+                }
+            }
+
+            img {
+                border: 2px solid $beige-color;
+                &:hover {
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+    .aside__logger {
+        position: absolute;
+        overflow: hidden;
+        color: white;
+        background: linear-gradient(to right, #495156, #252628);
+        opacity: 1;
+        z-index: 1000;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        border: 4px solid beige; 
+        left: 1%;
+        width: 12rem;
+        bottom: 6%;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        font-family: 'crimson-text', serif;
+        justify-content: space-between;
+        align-items: center;
+        max-height: 200px; 
+        overflow-y: scroll;
+        span.player-color {
+            text-shadow: 0px 0px 0px white;
+            font-weight: 500;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            li {
+                margin-bottom: 0.5rem;
+                font-size: 1rem;
+                span {
+                    color: $gold-color;
+                    font-weight: bold;
+                    font-weight: 700;;
+                }
+            }
+        }
+    }
+    
+}

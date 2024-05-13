@@ -1,0 +1,43 @@
+{
+  "name": "ivanssonne",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "homepage": "https://pslib-cz.github.io/2023-p3a-mpa-react-project-TomasKelbasa-IvanKraus/",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build --base=/2023-p3a-mpa-react-project-TomasKelbasa-IvanKraus/",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview", 
+    "deploy": "gh-pages -d dist"
+  },
+  "dependencies": {
+    "localforage": "^1.10.0",
+    "match-sorter": "^6.3.4",
+    "react": "^18.2.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "react-dom": "^18.2.0",
+    "react-dropdown": "^1.11.0",
+    "react-router-dom": "^6.22.3",
+    "sort-by": "^0.0.2",
+    "stack-typescript": "^1.0.4",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "@types/react": "^18.2.64",
+    "@types/react-dom": "^18.2.21",
+    "@types/uuid": "^9.0.8",
+    "@typescript-eslint/eslint-plugin": "^7.1.1",
+    "@typescript-eslint/parser": "^7.1.1",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "gh-pages": "^6.1.1",
+    "sass": "^1.72.0",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.6"
+  }
+}
